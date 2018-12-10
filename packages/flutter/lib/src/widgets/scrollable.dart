@@ -8,6 +8,7 @@ import 'dart:ui';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/physics.dart';
 
 import 'basic.dart';
 import 'framework.dart';
@@ -285,6 +286,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
 
   // Only call this from places that will definitely trigger a rebuild.
   void _updatePosition() {
+    print('updating');
     _configuration = ScrollConfiguration.of(context);
     _physics = _configuration.getScrollPhysics(context);
     if (widget.physics != null)
@@ -448,6 +450,22 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
   Drag _drag;
   ScrollHoldController _hold;
 
+  final double _kSpringConstant = 20.0;
+  final double _kScrollViewMass = 1.0;
+
+  final double _kMaximumAcceleration = 10; // Pixels per second.
+
+  DragUpdateDetails _mostRecentDragDetails;
+  Duration _previousTimeStamp;
+  Offset _previousGlobalPosition;
+  double _velocity;
+  double _acceleration;
+  double _previousAcceleration;
+  bool _hasPeaked;
+  AxisDirection _scrollDirection;
+
+  Ticker _positionUpdateTicker;
+
   void _handleDragDown(DragDownDetails details) {
     assert(_drag == null);
     assert(_hold == null);
@@ -460,20 +478,133 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
     // triggers a new activity to begin.
     assert(_drag == null);
     _drag = position.drag(details, _disposeDrag);
+    _previousGlobalPosition = details.globalPosition;
+    _previousTimeStamp = const Duration();
+    _velocity = 0;
+    _acceleration = 0;
+    _hasPeaked = false;
+    _previousAcceleration = 0;
+    _positionUpdateTicker = Ticker(_updatePositionUsingSpring);
+    _positionUpdateTicker.start();
     assert(_drag != null);
     assert(_hold == null);
+  }
+
+  void _updatePositionUsingSpring(Duration duration) {
+    final DragUpdateDetails details = _mostRecentDragDetails;
+    final Duration deltaTime = duration - _previousTimeStamp;
+    final double deltaTimeInSeconds = deltaTime.inMicroseconds / 1e6;
+
+    double primaryDelta = 0;
+
+    switch(_scrollDirection) {
+      case AxisDirection.down:
+        if (details.globalPosition.dy > (_previousGlobalPosition.dy + _velocity * deltaTimeInSeconds)) {
+          _acceleration += _kMaximumAcceleration;
+          _velocity += _acceleration * deltaTimeInSeconds;
+          primaryDelta = deltaTimeInSeconds * _velocity + deltaTimeInSeconds * deltaTimeInSeconds * _acceleration;
+        } else {
+          primaryDelta = details.globalPosition.dy - primaryDelta;
+          _velocity = (details.globalPosition.dy - _previousGlobalPosition.dy) / deltaTimeInSeconds;
+          _acceleration = 0;
+        }
+        break;
+      case AxisDirection.up:
+        if (details.globalPosition.dy < (_previousGlobalPosition.dy - _velocity * deltaTimeInSeconds)) {
+          _acceleration -= _kMaximumAcceleration;
+          _velocity -= _acceleration * deltaTimeInSeconds;
+          primaryDelta = deltaTimeInSeconds * _velocity + deltaTimeInSeconds * deltaTimeInSeconds * _acceleration;
+        } else {
+          primaryDelta = details.globalPosition.dy - primaryDelta;
+          _velocity = (details.globalPosition.dy - _previousGlobalPosition.dy) / deltaTimeInSeconds;
+          _acceleration = 0;
+        }
+        break;
+      default: break;
+    }
+//
+//    final double force = (details.globalPosition - _previousGlobalPosition).dy * _kSpringConstant;
+//    final double acceleration = force / _kScrollViewMass;
+//
+//    double deltaPosition = _velocity * deltaTimeInSeconds;
+//
+//    final bool accelerationIsIncreasing = acceleration.abs() > _previousAcceleration.abs();
+//
+//    if (accelerationIsIncreasing && _hasPeaked) {
+//      _hasPeaked = false;
+//    }
+////
+//    if (accelerationIsIncreasing && !_hasPeaked) {
+//      deltaPosition += acceleration * deltaTimeInSeconds * deltaTimeInSeconds;
+//    } else if (!accelerationIsIncreasing && !_hasPeaked){
+//      _hasPeaked = true;
+//    } else if (!accelerationIsIncreasing && _hasPeaked) {
+//      final double remaining = details.globalPosition.dy - _previousGlobalPosition.dy;
+//      deltaPosition = remaining * 10 * deltaTimeInSeconds;
+//    }
+//    print(deltaPosition);
+//print(accelerationIsIncreasing);
+
+
+
+//    print(acceleration);
+//print(_velocityTracker.getVelocity());
+//    print(force.toString());
+//    print(deltaPosition);
+//    print(deltaTime.inSeconds.toString() + ' and ' + force.toString() +
+//          ' and ' + acceleration.toString() + ' and ' + deltaPosition.toString());
+    Offset newDelta;
+
+
+    switch(widget.axis) {
+      case Axis.vertical:
+        newDelta = Offset(details.delta.dx, primaryDelta);
+        break;
+      case Axis.horizontal:
+        newDelta = Offset(primaryDelta, details.delta.dx);
+        break;
+    }
+
+    final DragUpdateDetails springModifiedDetails = DragUpdateDetails(
+      sourceTimeStamp: details.sourceTimeStamp,
+      delta: newDelta,
+      primaryDelta: primaryDelta,
+      globalPosition: _previousGlobalPosition + newDelta,
+    );
+
+    _previousTimeStamp = duration;
+    _previousGlobalPosition += newDelta;
+//    print(_previousGlobalPosition.toString() + ' and ' + details.globalPosition.toString());
+//    _velocity += acceleration * deltaTimeInSeconds;
+    _previousAcceleration = _acceleration;
+//    _drag?.update(springModifiedDetails);
   }
 
   void _handleDragUpdate(DragUpdateDetails details) {
     // _drag might be null if the drag activity ended and called _disposeDrag.
     assert(_hold == null || _drag == null);
+
+    _mostRecentDragDetails = details;
     _drag?.update(details);
+
+//
+    switch (widget.axisDirection) {
+      case AxisDirection.down:
+      case AxisDirection.up:
+        _scrollDirection = (details.globalPosition - _previousGlobalPosition).dy > 0 ? AxisDirection.down : AxisDirection.up;
+        break;
+      case AxisDirection.right:
+      case AxisDirection.left:
+        _scrollDirection = (details.globalPosition - _previousGlobalPosition).dx > 0 ? AxisDirection.right : AxisDirection.left;
+        break;
+    }
   }
 
   void _handleDragEnd(DragEndDetails details) {
     // _drag might be null if the drag activity ended and called _disposeDrag.
     assert(_hold == null || _drag == null);
     _drag?.end(details);
+    _positionUpdateTicker?.stop();
     assert(_drag == null);
   }
 
@@ -483,6 +614,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
     assert(_hold == null || _drag == null);
     _hold?.cancel();
     _drag?.cancel();
+    _positionUpdateTicker?.stop(canceled: true);
     assert(_hold == null);
     assert(_drag == null);
   }
