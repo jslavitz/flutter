@@ -454,7 +454,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
   final double _kScrollViewMass = 1.0;
 
   final double _kMaximumAcceleration = 10; // Pixels per second.
-
+  final double _kMaximumAccelerationDistance = 100; // Pixels.
   DragUpdateDetails _mostRecentDragDetails;
   Duration _previousTimeStamp;
   Offset _previousGlobalPosition;
@@ -484,38 +484,44 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
     _acceleration = 0;
     _hasPeaked = false;
     _previousAcceleration = 0;
-    _positionUpdateTicker = Ticker(_updatePositionUsingSpring);
-    _positionUpdateTicker.start();
+//    _positionUpdateTicker = Ticker(_updatePositionUsingSpring);
+//    _positionUpdateTicker.start();
     assert(_drag != null);
     assert(_hold == null);
   }
 
-  void _updatePositionUsingSpring(Duration duration) {
-    final DragUpdateDetails details = _mostRecentDragDetails;
-    final Duration deltaTime = duration - _previousTimeStamp;
+  DragUpdateDetails _updatePositionUsingSpring(DragUpdateDetails mostRecentDetails) {
+    final DragUpdateDetails details = mostRecentDetails;
+    final Duration deltaTime = details.sourceTimeStamp - _previousTimeStamp;
     final double deltaTimeInSeconds = deltaTime.inMicroseconds / 1e6;
 
+    final double currentDelta = (details.globalPosition.dy - _previousGlobalPosition.dy).abs();
+    final double accelerationMultiplier = lerpDouble(0, 1, (currentDelta - 1) / _kMaximumAccelerationDistance).clamp(0, 1);
     double primaryDelta = 0;
 
     switch(_scrollDirection) {
       case AxisDirection.down:
         if (details.globalPosition.dy > (_previousGlobalPosition.dy + _velocity * deltaTimeInSeconds)) {
-          _acceleration += _kMaximumAcceleration;
+          if (_acceleration < 0)
+            _acceleration = 0;
+          _acceleration += _kMaximumAcceleration * accelerationMultiplier;
           _velocity += _acceleration * deltaTimeInSeconds;
           primaryDelta = deltaTimeInSeconds * _velocity + deltaTimeInSeconds * deltaTimeInSeconds * _acceleration;
         } else {
-          primaryDelta = details.globalPosition.dy - primaryDelta;
+          primaryDelta = details.globalPosition.dy - _previousGlobalPosition.dy;
           _velocity = (details.globalPosition.dy - _previousGlobalPosition.dy) / deltaTimeInSeconds;
           _acceleration = 0;
         }
         break;
       case AxisDirection.up:
         if (details.globalPosition.dy < (_previousGlobalPosition.dy - _velocity * deltaTimeInSeconds)) {
-          _acceleration -= _kMaximumAcceleration;
-          _velocity -= _acceleration * deltaTimeInSeconds;
+          if (_acceleration > 0)
+            _acceleration = 0;
+          _acceleration -= _kMaximumAcceleration * accelerationMultiplier;
+          _velocity += _acceleration * deltaTimeInSeconds;
           primaryDelta = deltaTimeInSeconds * _velocity + deltaTimeInSeconds * deltaTimeInSeconds * _acceleration;
         } else {
-          primaryDelta = details.globalPosition.dy - primaryDelta;
+          primaryDelta = details.globalPosition.dy - _previousGlobalPosition.dy;
           _velocity = (details.globalPosition.dy - _previousGlobalPosition.dy) / deltaTimeInSeconds;
           _acceleration = 0;
         }
@@ -577,6 +583,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
 //    print(_previousGlobalPosition.toString() + ' and ' + details.globalPosition.toString());
 //    _velocity += acceleration * deltaTimeInSeconds;
     _previousAcceleration = _acceleration;
+    return springModifiedDetails;
 //    _drag?.update(springModifiedDetails);
   }
 
@@ -584,7 +591,6 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
     // _drag might be null if the drag activity ended and called _disposeDrag.
     assert(_hold == null || _drag == null);
 
-    _mostRecentDragDetails = details;
     _drag?.update(details);
 
 //
