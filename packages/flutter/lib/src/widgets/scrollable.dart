@@ -456,6 +456,8 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
   Offset _previousGlobalPosition;
   double _velocity;
   double _acceleration;
+  DragUpdateDetails _mostRecentDetails;
+  VelocityTracker _pointerVelocityTracker;
 
   AxisDirection _scrollDirection;
 
@@ -475,76 +477,71 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
     _drag = position.drag(details, _disposeDrag);
     _previousGlobalPosition = details.globalPosition;
     _previousTimeStamp = const Duration();
+    _pointerVelocityTracker = VelocityTracker();
+    _pointerVelocityTracker.addPosition(details.sourceTimeStamp, details.globalPosition);
     _velocity = 0;
     _acceleration = 0;
+    _positionUpdateTicker = Ticker(_updatePositionUsingSpring);
+    _positionUpdateTicker.start();
     assert(_drag != null);
     assert(_hold == null);
   }
 
-  DragUpdateDetails _updatePositionUsingSpring(DragUpdateDetails mostRecentDetails) {
-    final DragUpdateDetails details = mostRecentDetails;
-    final Duration deltaTime = details.sourceTimeStamp - _previousTimeStamp;
+//  DragUpdateDetails _updatePositionUsingSpring(DragUpdateDetails mostRecentDetails) {
+  void _updatePositionUsingSpring(Duration duration) {
+    final DragUpdateDetails details = _mostRecentDetails;
+    final Duration deltaTime = duration - _previousTimeStamp;
     final double deltaTimeInSeconds = deltaTime.inMicroseconds / 1e6;
 
     final double currentDelta = (details.globalPosition.dy - _previousGlobalPosition.dy).abs();
     final double accelerationMultiplier = lerpDouble(0.0, 1.0, (currentDelta - 1.0) / _kMaximumAccelerationDistance).clamp(0.0, 1.0);
-    double primaryDelta = 0;
+    double primaryDelta = .001;
     final double addedAcceleration = accelerationMultiplier * _kMaximumAcceleration;
     final double addedVelocity = (_acceleration + addedAcceleration) * deltaTimeInSeconds;
+    final double remainingDistance = details.globalPosition.dy - _previousGlobalPosition.dy;
+    final double midPoint = _previousGlobalPosition.dy + remainingDistance / 2;
 
+//    final SpringSimulation springSimulation = ScrollSpringSimulation(SpringDescription.withDampingRatio(mass: 1.0, stiffness: 10.0),
+//        _previousGlobalPosition.dy, details.globalPosition.dy, _velocity);
+//    primaryDelta = springSimulation.x(deltaTimeInSeconds);
+//print(_previousGlobalPosition.dy.toString() + ' and ' + details.globalPosition.dy.toString() + ' and ' + _velocity.toString());
+//print(primaryDelta);
     switch(_scrollDirection) {
-      case AxisDirection.down:
-        if (details.globalPosition.dy > (_previousGlobalPosition.dy + (_velocity + addedVelocity) * deltaTimeInSeconds)) {
-          if (_acceleration < 0)
-            _acceleration = 0;
-          print(_acceleration.toString() + ' and ' + _velocity.toString());
-          _acceleration += addedAcceleration;
-          _velocity += addedVelocity;
-          primaryDelta = deltaTimeInSeconds * _velocity + deltaTimeInSeconds * deltaTimeInSeconds * _acceleration;
-          print(_acceleration.toString() + ' and ' + _velocity.toString() + ' and ' + deltaTimeInSeconds.toString());
-        } else {
-          primaryDelta = details.globalPosition.dy - _previousGlobalPosition.dy;
-          _velocity = (details.globalPosition.dy - _previousGlobalPosition.dy) / deltaTimeInSeconds;
-          _acceleration = 0;
-        }
-        break;
       case AxisDirection.up:
-        if (details.globalPosition.dy < (_previousGlobalPosition.dy - (_velocity + addedVelocity) * deltaTimeInSeconds)) {
+        // Accelerate
+        final double vel =_pointerVelocityTracker.getVelocity().pixelsPerSecond.dy;
+        print(vel);
+        if (_velocity > _pointerVelocityTracker.getVelocity().pixelsPerSecond.dy) {
           if (_acceleration > 0)
             _acceleration = 0;
-          _acceleration -= addedAcceleration;
-          _velocity += addedVelocity;
+          _acceleration -= _kMaximumAcceleration * deltaTimeInSeconds;
+          _velocity += _acceleration * deltaTimeInSeconds;
           primaryDelta = deltaTimeInSeconds * _velocity + deltaTimeInSeconds * deltaTimeInSeconds * _acceleration;
+          print(primaryDelta.toString() + ' and ' + _acceleration.toString() + ' and ' + vel.toString());
         } else {
-          primaryDelta = details.globalPosition.dy - _previousGlobalPosition.dy;
-          _velocity = (details.globalPosition.dy - _previousGlobalPosition.dy) / deltaTimeInSeconds;
-          _acceleration = 0;
+          if (_acceleration < 0)
+            _acceleration = 0;
+          _acceleration += _kMaximumAcceleration * deltaTimeInSeconds;
+          _velocity += _acceleration * deltaTimeInSeconds;
+          primaryDelta = deltaTimeInSeconds * _velocity + deltaTimeInSeconds * deltaTimeInSeconds * _acceleration;
         }
+        break;
+      case AxisDirection.down:
+        print('donw');
+//        if (details.globalPosition.dy < (_previousGlobalPosition.dy - (_velocity + addedVelocity) * deltaTimeInSeconds)) {
+//          if (_acceleration > 0)
+//            _acceleration = 0;
+//          _acceleration -= addedAcceleration;
+//          _velocity += addedVelocity;
+//          primaryDelta = deltaTimeInSeconds * _velocity + deltaTimeInSeconds * deltaTimeInSeconds * _acceleration;
+//        } else {
+//          primaryDelta = details.globalPosition.dy - _previousGlobalPosition.dy;
+//          _velocity = (details.globalPosition.dy - _previousGlobalPosition.dy) / deltaTimeInSeconds;
+//          _acceleration = 0;
+//        }
         break;
       default: break;
     }
-
-    print(primaryDelta);
-//
-//    final double force = (details.globalPosition - _previousGlobalPosition).dy * _kSpringConstant;
-//    final double acceleration = force / _kScrollViewMass;
-//
-//    double deltaPosition = _velocity * deltaTimeInSeconds;
-//
-//    final bool accelerationIsIncreasing = acceleration.abs() > _previousAcceleration.abs();
-//
-//    if (accelerationIsIncreasing && _hasPeaked) {
-//      _hasPeaked = false;
-//    }
-////
-//    if (accelerationIsIncreasing && !_hasPeaked) {
-//      deltaPosition += acceleration * deltaTimeInSeconds * deltaTimeInSeconds;
-//    } else if (!accelerationIsIncreasing && !_hasPeaked){
-//      _hasPeaked = true;
-//    } else if (!accelerationIsIncreasing && _hasPeaked) {
-//      final double remaining = details.globalPosition.dy - _previousGlobalPosition.dy;
-//      deltaPosition = remaining * 10 * deltaTimeInSeconds;
-//    }
 
     Offset newDelta;
     switch(widget.axis) {
@@ -563,15 +560,16 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
       globalPosition: _previousGlobalPosition + newDelta,
     );
 
-    _previousTimeStamp = details.sourceTimeStamp;
+    _previousTimeStamp = duration;
     _previousGlobalPosition += newDelta;
-    return springModifiedDetails;
+//    _velocity = primaryDelta / deltaTimeInSeconds;
+
+    _drag?.update(springModifiedDetails);
   }
 
   void _handleDragUpdate(DragUpdateDetails details) {
     // _drag might be null if the drag activity ended and called _disposeDrag.
     assert(_hold == null || _drag == null);
-    print('velocity ' + _velocity.toString());
     switch (widget.axisDirection) {
       case AxisDirection.down:
       case AxisDirection.up:
@@ -582,8 +580,9 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
         _scrollDirection = (details.globalPosition - _previousGlobalPosition).dx > 0 ? AxisDirection.right : AxisDirection.left;
         break;
     }
-print(_scrollDirection);
-    _drag?.update(_updatePositionUsingSpring(details));
+//    print(details.primaryDelta);
+    _mostRecentDetails = details;
+    _pointerVelocityTracker.addPosition(details.sourceTimeStamp, details.globalPosition);
   }
 
   void _handleDragEnd(DragEndDetails details) {
