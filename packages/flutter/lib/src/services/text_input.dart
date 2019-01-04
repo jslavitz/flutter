@@ -473,6 +473,25 @@ class RawFloatingCursorPoint {
   final FloatingCursorDragState state;
 }
 
+///
+class AutocorrectState {
+  ///
+  AutocorrectState({
+    this.suggestedWord,
+    @required this.startIndex,
+    @required this.endIndex,
+  });
+
+  ///
+  final String suggestedWord;
+
+  ///
+  final int startIndex;
+
+  ///
+  final int endIndex;
+}
+
 /// The current text, selection, and composing state for editing a run of text.
 @immutable
 class TextEditingValue {
@@ -603,6 +622,9 @@ abstract class TextInputClient {
 
   /// Updates the floating cursor position and state.
   void updateFloatingCursor(RawFloatingCursorPoint point);
+
+  ///
+  void updateAutocorrectState(AutocorrectState state);
 }
 
 /// An interface for interacting with a text input control.
@@ -705,6 +727,10 @@ RawFloatingCursorPoint _toTextPoint(FloatingCursorDragState state, Map<String, d
   return RawFloatingCursorPoint(offset: offset, state: state);
 }
 
+AutocorrectState _toAutocorrectState(Map<String, dynamic> encoded) {
+  return AutocorrectState(suggestedWord: encoded['suggestion'], startIndex: encoded['start'], endIndex: encoded['end']);
+}
+
 class _TextInputClientHandler {
   _TextInputClientHandler() {
     SystemChannels.textInput.setMethodCallHandler(_handleTextInputInvocation);
@@ -730,6 +756,9 @@ class _TextInputClientHandler {
         break;
       case 'TextInputClient.updateFloatingCursor':
         _currentConnection._client.updateFloatingCursor(_toTextPoint(_toTextCursorAction(args[1]), args[2]));
+        break;
+      case 'TextInputClient.updateAutocorrectSuggestionState':
+        _currentConnection._client.updateAutocorrectState(_toAutocorrectState(args[1]));
         break;
       default:
         throw MissingPluginException();

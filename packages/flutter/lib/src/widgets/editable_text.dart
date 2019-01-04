@@ -594,9 +594,25 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   // TextInputClient implementation:
 
   TextEditingValue _lastKnownRemoteTextEditingValue;
+  bool _hasJustTypedCharacter;
 
   @override
   void updateEditingValue(TextEditingValue value) {
+
+    _hasJustTypedCharacter = true;
+
+    print(_value.text[_value.text.length -1] == ' ');
+    // We want to replace whatever apple has typed with our own value.
+    if (_isAutocorrecting && _value.text[_value.text.length -1] == ' ') {
+      print('replacing');
+      _isAutocorrecting = false;
+      final TextEditingValue newValue = TextEditingValue(text: value.text.replaceRange(_lastStart, value.text.length - 1, _lastSuggestedWord),
+              selection: value.selection,
+              composing: value.composing
+      );
+      value = newValue;
+    }
+
     if (value.text != _value.text) {
       _hideSelectionOverlayIfNeeded();
       _showCaretOnScreen();
@@ -607,6 +623,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
     _lastKnownRemoteTextEditingValue = value;
     _formatAndSetValue(value);
+
   }
 
   @override
@@ -677,6 +694,23 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         _floatingCursorResetController.animateTo(1.0, duration: _floatingCursorResetTime, curve: Curves.decelerate);
       break;
     }
+  }
+
+  bool _isAutocorrecting = false;
+  String _lastSuggestedWord;
+  int _lastStart;
+  int _lastEnd;
+
+  @override
+  void updateAutocorrectState(AutocorrectState state) {
+    _isAutocorrecting = true;
+    _lastSuggestedWord = state.suggestedWord;
+    if (_hasJustTypedCharacter) {
+      _hasJustTypedCharacter = false;
+      _lastStart = state.startIndex;
+      _lastEnd = state.endIndex;
+    }
+    print("f: start: " + state.startIndex.toString() + "f:end: " + state.endIndex.toString() + "f:word:" + state.suggestedWord);
   }
 
   void _onFloatingCursorResetTick() {
