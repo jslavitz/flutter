@@ -30,9 +30,9 @@ import 'edge_insets.dart';
 /// * [RoundedRectangleBorder] Which creates a square with rounded corners,
 ///   however it doesn't allow the corners to bend the sides of the square
 ///   like a superellipse, resulting in a more square shape.
-class SuperellipseShape extends ShapeBorder {
+class SuperEllipseCupertinoShape extends ShapeBorder {
   /// The arguments must not be null.
-  const SuperellipseShape({
+  const SuperEllipseCupertinoShape({
     this.side = BorderSide.none,
     this.borderRadius = BorderRadius.zero,
   }) : assert(side != null),
@@ -52,7 +52,7 @@ class SuperellipseShape extends ShapeBorder {
 
   @override
   ShapeBorder scale(double t) {
-    return SuperellipseShape(
+    return SuperEllipseCupertinoShape(
       side: side.scale(t),
       borderRadius: borderRadius * t,
     );
@@ -61,8 +61,8 @@ class SuperellipseShape extends ShapeBorder {
   @override
   ShapeBorder lerpFrom(ShapeBorder a, double t) {
     assert(t != null);
-    if (a is SuperellipseShape) {
-      return SuperellipseShape(
+    if (a is SuperEllipseCupertinoShape) {
+      return SuperEllipseCupertinoShape(
         side: BorderSide.lerp(a.side, side, t),
         borderRadius: BorderRadiusGeometry.lerp(a.borderRadius, borderRadius, t),
       );
@@ -73,54 +73,14 @@ class SuperellipseShape extends ShapeBorder {
   @override
   ShapeBorder lerpTo(ShapeBorder b, double t) {
     assert(t != null);
-    if (b is SuperellipseShape) {
-      return SuperellipseShape(
+    if (b is SuperEllipseCupertinoShape) {
+      return SuperEllipseCupertinoShape(
         side: BorderSide.lerp(side, b.side, t),
         borderRadius: BorderRadiusGeometry.lerp(borderRadius, b.borderRadius, t),
       );
     }
     return super.lerpTo(b, t);
   }
-
-  double _clampToShortest(RRect rrect, double value) {
-    return value > rrect.shortestSide ? rrect.shortestSide : value;
-  }
-
-//  Path _getPath(RRect rrect) {
-//    final double left = rrect.left;
-//    final double right = rrect.right;
-//    final double top = rrect.top;
-//    final double bottom = rrect.bottom;
-//    //  Radii will be clamped to the value of the shortest side
-//    /// of [rrect] to avoid strange tie-fighter shapes.
-//    final double tlRadiusX =
-//      math.max(0.0, _clampToShortest(rrect, rrect.tlRadiusX));
-//    final double tlRadiusY =
-//      math.max(0.0, _clampToShortest(rrect, rrect.tlRadiusY));
-//    final double trRadiusX =
-//      math.max(0.0, _clampToShortest(rrect, rrect.trRadiusX));
-//    final double trRadiusY =
-//      math.max(0.0, _clampToShortest(rrect, rrect.trRadiusY));
-//    final double blRadiusX =
-//      math.max(0.0, _clampToShortest(rrect, rrect.blRadiusX));
-//    final double blRadiusY =
-//      math.max(0.0, _clampToShortest(rrect, rrect.blRadiusY));
-//    final double brRadiusX =
-//      math.max(0.0, _clampToShortest(rrect, rrect.brRadiusX));
-//    final double brRadiusY =
-//      math.max(0.0, _clampToShortest(rrect, rrect.brRadiusY));
-//
-//    return Path()
-//      ..moveTo(left, top + tlRadiusX)
-//      ..cubicTo(left, top, left, top, left + tlRadiusY, top)
-//      ..lineTo(right - trRadiusX, top)
-//      ..cubicTo(right, top, right, top, right, top + trRadiusY)
-//      ..lineTo(right, bottom - blRadiusX)
-//      ..cubicTo(right, bottom, right, bottom, right - blRadiusY, bottom)
-//      ..lineTo(left + brRadiusX, bottom)
-//      ..cubicTo(left, bottom, left, bottom, left, bottom - brRadiusY)
-//      ..close();
-//  }
 
   Path _getPath(RRect rrect) {
 
@@ -141,66 +101,37 @@ class SuperellipseShape extends ShapeBorder {
       return Offset(rrect.center.dx - x * limitedRadius + rrect.width, rrect.center.dy - y * limitedRadius + rrect.height);
     }
 
-    Offset _bottomLeft(double x, double y) {
-      return Offset(rrect.center.dx + x * limitedRadius, rrect.center.dy - y * limitedRadius + rrect.height);
-    }
+//    Offset _bottomLeft(double x, double y) {
+//      return Offset(rrect.center.dx + x * limitedRadius, rrect.center.dy - y * limitedRadius + rrect.height);
+//    }
 
     final Offset p1 = _topLeft(1.52866483, 0.00000000);
-    final Offset p1a = _topRight(1.52866471, 0.00000000);
+    final Offset p11 = _topRight(1.52866471, 0.00000000);
 
     final Offset p2 = _topRight(0.66993427, 0.06549600);
-    final Offset p2a = _topRight(1.08849323, 0.00000000);
-    final Offset p2b = _topRight(0.86840689, 0.00000000);
+    final Offset p21 = _topRight(1.08849323, 0.00000000);
+    final Offset p22 = _topRight(0.86840689, 0.00000000);
 
     final Offset p3 = _topRight(0.63149399, 0.07491100);
 
     final Offset p4 = _topRight(0.07491176, 0.63149399);
-    final Offset p4a = _topRight(0.37282392, 0.16905899);
-    final Offset p4b = _topRight(0.16906013, 0.37282401);
+    final Offset p41 = _topRight(0.37282392, 0.16905899);
+    final Offset p42 = _topRight(0.16906013, 0.37282401);
 
     final Offset p5 = _topRight(0.00000000, 1.52866483);
-    final Offset p5a = _topRight(0.00000000, 0.86840701);
-    final Offset p5b = _topRight(0.00000000, 1.08849299);
+    final Offset p51 = _topRight(0.00000000, 0.86840701);
+    final Offset p52 = _topRight(0.00000000, 1.08849299);
 
     final Offset p6 = _bottomRight(0.00000000, 1.52866471);
 
-    final Offset p7 = _bottomRight(0.06549569, 0.66993493);
-    final Offset p7a = _bottomRight(0.00000000, 1.08849323);
-    final Offset p7b = _bottomRight(0.00000000, 0.86840689);
-
-    final Offset p8 = _bottomRight(0.07491111, 0.63149399);
-
-    final Offset p9 = _bottomRight(0.63149399, 0.07491111);
-    final Offset p9a = _bottomRight(0.16905883, 0.37282392);
-    final Offset p9b = _bottomRight(0.37282392, 0.16905883);
-
-    final Offset p10 = _bottomRight(1.52866471, 0.00000000);
-    final Offset p10a = _bottomRight(0.86840689, 0.00000000);
-    final Offset p10b = _bottomRight(1.08849323, 0.00000000);
-
-    final Offset p11 = _bottomLeft(1.52866483, 0.00000000);
-
-//    final Offset p6 = _bottomRight(1.52866471, 0.00000000);
-//    final Offset p6 = _bottomRight(1.52866471, 0.00000000);
-//    final Offset p6 = _bottomRight(1.52866471, 0.00000000);
-
-
     return Path()
       ..moveTo(p1.dx, p1.dy)
-
-      ..lineTo(p1a.dx, p1a.dy)
-      ..cubicTo(p2a.dx, p2a.dy, p2b.dx, p2b.dy, p2.dx, p2.dy)
-      ..lineTo(p3.dx, p3.dy)
-      ..cubicTo(p4a.dx, p4a.dy, p4b.dx, p4b.dy, p4.dx, p4.dy)
-      ..cubicTo(p5a.dx, p5a.dy, p5b.dx, p5b.dy, p5.dx, p5.dy)
-
-      ..lineTo(p6.dx, p6.dy)
-      ..cubicTo(p7a.dx, p7a.dy, p7b.dx, p7b.dy, p7.dx, p7.dy)
-      ..lineTo(p8.dx, p8.dy)
-      ..cubicTo(p9a.dx, p9a.dy, p9b.dx, p9b.dy, p9.dx, p9.dy)
-      ..cubicTo(p10a.dx, p10a.dy, p10b.dx, p10b.dy, p10.dx, p10.dy)
-
       ..lineTo(p11.dx, p11.dy)
+      ..cubicTo(p21.dx, p21.dy, p22.dx, p22.dy, p2.dx, p2.dy)
+      ..lineTo(p3.dx, p3.dy)
+      ..cubicTo(p41.dx, p41.dy, p42.dx, p42.dy, p4.dx, p4.dy)
+      ..cubicTo(p51.dx, p51.dy, p52.dx, p52.dy, p5.dx, p5.dy)
+      ..lineTo(p6.dx, p6.dy)
 
 //      [path addLineToPoint: TOP_RIGHT(1.52866471, 0.00000000)];
 
@@ -223,19 +154,14 @@ class SuperellipseShape extends ShapeBorder {
 //      [path addCurveToPoint: BOTTOM_RIGHT(0.06549569, 0.66993493)
 //      controlPoint1: BOTTOM_RIGHT(0.00000000, 1.08849323)
 //      controlPoint2: BOTTOM_RIGHT(0.00000000, 0.86840689)];
-
 //      [path addLineToPoint: BOTTOM_RIGHT(0.07491111, 0.63149399)];
-
 //      [path addCurveToPoint: BOTTOM_RIGHT(0.63149399, 0.07491111)
 //      controlPoint1: BOTTOM_RIGHT(0.16905883, 0.37282392)
 //      controlPoint2: BOTTOM_RIGHT(0.37282392, 0.16905883)];
-
 //      [path addCurveToPoint: BOTTOM_RIGHT(1.52866471, 0.00000000)
 //      controlPoint1: BOTTOM_RIGHT(0.86840689, 0.00000000)
 //      controlPoint2: BOTTOM_RIGHT(1.08849323, 0.00000000)];
-
 //      [path addLineToPoint: BOTTOM_LEFT(1.52866483, 0.00000000)];
-
 //      [path addCurveToPoint: BOTTOM_LEFT(0.66993397, 0.06549569)
 //      controlPoint1: BOTTOM_LEFT(1.08849299, 0.00000000)
 //      controlPoint2: BOTTOM_LEFT(0.86840701, 0.00000000)];
@@ -301,7 +227,7 @@ class SuperellipseShape extends ShapeBorder {
   bool operator ==(dynamic other) {
     if (runtimeType != other.runtimeType)
       return false;
-    final SuperellipseShape typedOther = other;
+    final SuperEllipseCupertinoShape typedOther = other;
     return side == typedOther.side
         && borderRadius == typedOther.borderRadius;
   }
