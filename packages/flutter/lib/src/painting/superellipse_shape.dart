@@ -84,23 +84,23 @@ class SuperellipseShape extends ShapeBorder {
 
   Path _getPath(RRect rrect) {
     final double radius = rrect.trRadiusX;
-    final double limit = math.min(rrect.width, rrect.height) / 2 / 1.52866483;
-    final double limitedRadius = math.min(radius, limit);
+//    final double limit = math.min(rrect.width, rrect.height) / 2 / 1.52866483;
+    final double limitedRadius = radius; //math.min(radius, limit);
 
     double _leftX(double x) {
-      return rrect.center.dx + x * limitedRadius;
+      return rrect.center.dx + x * limitedRadius - rrect.width / 2;
     }
 
     double _rightX(double x) {
-      return rrect.center.dx - x * limitedRadius + rrect.width;
+      return rrect.center.dx - x * limitedRadius + rrect.width / 2;
     }
 
     double _topY(double y) {
-      return rrect.center.dy + y * limitedRadius;
+      return rrect.center.dy + y * limitedRadius - rrect.height / 2;
     }
 
     double _bottomY(double y) {
-      return rrect.center.dy - y * limitedRadius + rrect.height;
+      return rrect.center.dy - y * limitedRadius + rrect.height / 2;
     }
 
     return Path()

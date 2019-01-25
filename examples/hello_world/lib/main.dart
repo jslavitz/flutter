@@ -7,23 +7,59 @@ import 'package:flutter/material.dart';
 
 //void main() => runApp(const Center(child: Text('Hello, world!', textDirection: TextDirection.ltr)));
 void main() {
-  runApp(
-    MaterialApp(
-      home: Container(
-        width: 300,
-        height: 300,
-        alignment: Alignment.center,
-        child: Material(
-          color: Colors.blueAccent[400],
-            shape: SuperellipseShape(
-              borderRadius: const BorderRadius.all(Radius.circular(40.0)),
-            ),
-            child: Container(
-              width: 100.0,
-              height: 200.0,
-            ), // Container
-          ), // Material
+  runApp(SliderDemo());
+}
+
+class SliderDemo extends StatefulWidget {
+  static const String routeName = '/material/slider';
+
+  @override
+  _SliderDemoState createState() => _SliderDemoState();
+}
+
+class _SliderDemoState extends State<SliderDemo> {
+
+  double radius = 40.0;
+
+  final double min = 0.1;
+  final double max = 200;
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Material(
+        child:Padding(padding: const EdgeInsets.all(40.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: <Widget>[
+              Container(
+                alignment: Alignment.center,
+                child: Material(
+                  elevation: 20.0,
+                  color: Colors.lightBlueAccent,
+                  shape: SuperellipseShape(
+                    borderRadius: BorderRadius.all(Radius.circular(radius)),
+                  ),
+                  child: Container(
+                    width: 200.0,
+                    height: 200.0,
+                  ),
+                ),
+              ),
+              Slider(
+                value: radius,
+                min: min,
+                max: max,
+                onChanged:(double value) {
+                  setState(() {
+                    radius = value;
+                  });
+                },
+              ),
+            ],
+          ),
+        )
       ),
-    )
-  );
+    );
+  }
 }
