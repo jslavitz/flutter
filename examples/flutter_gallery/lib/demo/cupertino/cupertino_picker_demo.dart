@@ -7,7 +7,7 @@ import 'package:intl/intl.dart';
 import '../../gallery/demo.dart';
 import 'cupertino_navigation_demo.dart' show coolColorNames;
 
-const double _kPickerSheetHeight = 216.0;
+const double _kPickerSheetHeight = 300.0;
 const double _kPickerItemHeight = 32.0;
 
 class CupertinoPickerDemo extends StatefulWidget {
