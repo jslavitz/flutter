@@ -258,6 +258,14 @@ class CupertinoDatePicker extends StatefulWidget {
       return _CupertinoDatePickerDateState();
   }
 
+  /// Reset the picker back to it's original values.
+  static void reset(BuildContext context) {
+      final _CupertinoDatePickerDateTimeState dateTimePicker = context.ancestorStateOfType(const TypeMatcher<_CupertinoDatePickerDateTimeState>());
+      dateTimePicker?.reset();
+//      final _CupertinoDatePickerDateState datePicker = context.ancestorStateOfType(const TypeMatcher<_CupertinoDatePickerDateState>());
+//      datePicker?.reset();
+  }
+
   // Estimate the minimum width that each column needs to layout its content.
   static double _getColumnWidth(
     _PickerColumnType columnType,
@@ -359,6 +367,9 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
 
   // The controller of the AM/PM column.
   FixedExtentScrollController amPmController;
+  FixedExtentScrollController hourController;
+  FixedExtentScrollController minuteController;
+  FixedExtentScrollController dateController;
 
   // Estimated width of columns.
   final Map<int, double> estimatedColumnWidths = <int, double>{};
@@ -405,6 +416,14 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
     estimatedColumnWidths.clear();
   }
 
+  void reset() {
+    amPmController.animateToItem(
+      0,
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.easeOut
+    );
+  }
+
   // Lazily calculate the column width of the column being displayed only.
   double _getEstimatedColumnWidth(_PickerColumnType columnType) {
     if (estimatedColumnWidths[columnType.index] == null) {
@@ -434,8 +453,9 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
 
   // Builds the date column. The date is displayed in medium date format (e.g. Fri Aug 31).
   Widget _buildMediumDatePicker(double offAxisFraction, TransitionBuilder itemPositioningBuilder) {
+    dateController = FixedExtentScrollController(initialItem: selectedDayFromInitial);
     return CupertinoPicker.builder(
-      scrollController: FixedExtentScrollController(initialItem: selectedDayFromInitial),
+      scrollController: dateController,
       offAxisFraction: offAxisFraction,
       itemExtent: _kItemExtent,
       useMagnifier: _kUseMagnifier,
@@ -466,8 +486,9 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
   }
 
   Widget _buildHourPicker(double offAxisFraction, TransitionBuilder itemPositioningBuilder) {
+    hourController = FixedExtentScrollController(initialItem: selectedHour);
     return CupertinoPicker(
-      scrollController: FixedExtentScrollController(initialItem: selectedHour),
+      scrollController: hourController,
       offAxisFraction: offAxisFraction,
       itemExtent: _kItemExtent,
       useMagnifier: _kUseMagnifier,
@@ -515,8 +536,9 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
   }
 
   Widget _buildMinutePicker(double offAxisFraction, TransitionBuilder itemPositioningBuilder) {
+    minuteController = FixedExtentScrollController(initialItem: selectedMinute);
     return CupertinoPicker(
-      scrollController: FixedExtentScrollController(initialItem: selectedMinute),
+      scrollController: minuteController,
       offAxisFraction: offAxisFraction,
       itemExtent: _kItemExtent,
       useMagnifier: _kUseMagnifier,
