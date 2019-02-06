@@ -41,12 +41,12 @@ class TestWidgetState extends State<TestWidget> {
           children: <Widget>[
             Container(
               padding: const EdgeInsets.all(40.0) + const EdgeInsets.only(top: 30.0),
-              height: 300,
+              height: 350,
               alignment: Alignment.center,
               child: Material(
                 elevation: 20.0,
                 color: Colors.lightBlue,
-                shape: CupertinoRoundedRectangleBorder(
+                shape: SuperEllipseRoundedRectangleBorder(
                   borderRadius: radius,
                   mode: mode,
                 ),
@@ -89,6 +89,7 @@ class TestWidgetState extends State<TestWidget> {
                     onChanged: (double value) {
                       setState(() {
                         height = value;
+                        print(height);
                       });
                     }
                   ),
@@ -103,7 +104,6 @@ class TestWidgetState extends State<TestWidget> {
                       ],
                       onSelectedItemChanged: (int item) {
                         setState(() {
-                          print('hjere');
                           mode = item == 0 ? RoundedRectCornerMode.dynamicShape :
                             RoundedRectCornerMode.dynamicRadius;
                         });
@@ -112,7 +112,7 @@ class TestWidgetState extends State<TestWidget> {
                   ),
                 ],
               ),
-            )
+            ),
           ],
         ),
       ),
