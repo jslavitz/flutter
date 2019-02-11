@@ -953,7 +953,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   bool _showCaretOnScreenScheduled = false;
 
-  void _showCaretOnScreen() {
+  void _showCaretOnScreen({ bool animateToPosition = true }) {
     if (_showCaretOnScreenScheduled) {
       return;
     }
@@ -963,12 +963,16 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       if (_currentCaretRect == null || !_scrollController.hasClients){
         return;
       }
-      final double scrollOffsetForCaret =  _getScrollOffsetForCaret(_currentCaretRect);
-      _scrollController.animateTo(
-        scrollOffsetForCaret,
-        duration: _caretAnimationDuration,
-        curve: _caretAnimationCurve,
-      );
+      final double scrollOffsetForCaret = _getScrollOffsetForCaret(_currentCaretRect);
+      if (animateToPosition)
+        _scrollController.animateTo(
+          scrollOffsetForCaret,
+          duration: _caretAnimationDuration,
+          curve: _caretAnimationCurve,
+        );
+      else
+        _scrollController.jumpTo(scrollOffsetForCaret);
+
       final Rect newCaretRect = _getCaretRectAtScrollOffset(_currentCaretRect, scrollOffsetForCaret);
       // Enlarge newCaretRect by scrollPadding to ensure that caret is not positioned directly at the edge after scrolling.
       final Rect inflatedRect = Rect.fromLTRB(
@@ -979,7 +983,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       );
       _editableKey.currentContext.findRenderObject().showOnScreen(
         rect: inflatedRect,
-        duration: _caretAnimationDuration,
+        duration: animateToPosition ? _caretAnimationDuration : const Duration(),
         curve: _caretAnimationCurve,
       );
     });
@@ -1113,8 +1117,15 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       // Listen for changing viewInsets, which indicates keyboard showing up.
       WidgetsBinding.instance.addObserver(this);
       _lastBottomViewInset = WidgetsBinding.instance.window.viewInsets.bottom;
-      _showCaretOnScreen();
+      if (_canDrag) {
+        _showCaretOnScreen();
+      } else {
+        print('hererer');
+        widget.controller.selection = TextSelection.collapsed(offset: _value.text.length - 1);
+        _showCaretOnScreen(animateToPosition: false);
+      }
       if (!_value.selection.isValid) {
+        print('invalid');
         // Place cursor at the end if the selection is invalid when we receive focus.
         widget.controller.selection = TextSelection.collapsed(offset: _value.text.length);
       }
@@ -1122,6 +1133,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       WidgetsBinding.instance.removeObserver(this);
       // Clear the selection and composition state if this widget lost focus.
       _value = TextEditingValue(text: _value.text);
+      if (!_canDrag)
+        _scrollController.jumpTo(0);
     }
     updateKeepAlive();
   }
@@ -1142,6 +1155,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   TextEditingValue get textEditingValue => _value;
 
   double get _devicePixelRatio => MediaQuery.of(context).devicePixelRatio ?? 1.0;
+
+  bool get _canDrag => _isMultiline ? true : widget.canDragSingleLineField;
 
   @override
   set textEditingValue(TextEditingValue value) {
@@ -1193,7 +1208,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   Widget build(BuildContext context) {
     FocusScope.of(context).reparentIfNeeded(widget.focusNode);
     super.build(context); // See AutomaticKeepAliveClientMixin.
-
     final TextSelectionControls controls = widget.selectionControls;
     return Scrollable(
       excludeFromSemantics: true,
@@ -1201,7 +1215,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       controller: _scrollController,
       physics: const ClampingScrollPhysics(),
       dragStartBehavior: widget.dragStartBehavior,
-      canDrag: _isMultiline ? true : widget.canDragSingleLineField,
+      canDrag: _canDrag,
       viewportBuilder: (BuildContext context, ViewportOffset offset) {
         return CompositedTransformTarget(
           link: _layerLink,

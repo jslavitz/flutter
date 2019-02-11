@@ -1198,6 +1198,28 @@ void main() {
     },
   );
 
+  testWidgets('A single line text field cannot be scrolled', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(
+      text: 'Atwater Peel Sherbrooke Bonaventure',
+    );
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoTextField(
+            controller: controller,
+            maxLines: 1,
+          ),
+        ),
+      ),
+    );
+
+    // Cursor will be at the end of the text after tapping
+    await tester.tap(find.byType(CupertinoTextField));
+    await tester.drag(find.byType(CupertinoTextField), const Offset(1000, 0));
+
+
+  });
+
   testWidgets(
     'text field respects theme',
     (WidgetTester tester) async {
@@ -1258,6 +1280,8 @@ void main() {
     expect(setClient.method, 'TextInput.setClient');
     expect(setClient.arguments.last['keyboardAppearance'], 'Brightness.dark');
   });
+
+
 
   testWidgets('text field can override keyboardAppearance from theme', (WidgetTester tester) async {
     final List<MethodCall> log = <MethodCall>[];

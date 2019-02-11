@@ -363,7 +363,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
       widget.controller?.attach(position);
     }
 
-    setCanDrag(widget.canDrag);
+//    setCanDrag(widget.canDrag);
 
     if (_shouldUpdatePosition(oldWidget))
       _updatePosition();
