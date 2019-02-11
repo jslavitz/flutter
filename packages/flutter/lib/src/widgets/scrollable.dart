@@ -82,6 +82,7 @@ class Scrollable extends StatefulWidget {
     this.excludeFromSemantics = false,
     this.semanticChildCount,
     this.dragStartBehavior = DragStartBehavior.down,
+    this.canDrag = true,
   }) : assert(axisDirection != null),
        assert(dragStartBehavior != null),
        assert(viewportBuilder != null),
@@ -201,6 +202,13 @@ class Scrollable extends StatefulWidget {
   ///  * [DragGestureRecognizer.dragStartBehavior], which gives an example for the different behaviors.
   /// {@endtemplate}
   final DragStartBehavior dragStartBehavior;
+
+  /// Whether or not the scrollable can drag the scrollable.
+  ///
+  /// In the case of single line text editing it can sometimes make sense to
+  /// disable scrolling, while enabling it when the text field has more than
+  /// a single line.
+  final bool canDrag;
 
   /// The axis along which the scroll view scrolls.
   ///
@@ -355,6 +363,8 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
       widget.controller?.attach(position);
     }
 
+    setCanDrag(widget.canDrag);
+
     if (_shouldUpdatePosition(oldWidget))
       _updatePosition();
   }
@@ -396,7 +406,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
   void setCanDrag(bool canDrag) {
     if (canDrag == _lastCanDrag && (!canDrag || widget.axis == _lastAxisDirection))
       return;
-    if (!canDrag) {
+    if (!canDrag || !widget.canDrag) {
       _gestureRecognizers = const <Type, GestureRecognizerFactory>{};
     } else {
       switch (widget.axis) {

@@ -230,6 +230,7 @@ class EditableText extends StatefulWidget {
     this.keyboardAppearance = Brightness.light,
     this.dragStartBehavior = DragStartBehavior.down,
     this.enableInteractiveSelection,
+    this.canDragSingleLineField = true,
   }) : assert(controller != null),
        assert(focusNode != null),
        assert(obscureText != null),
@@ -535,6 +536,11 @@ class EditableText extends StatefulWidget {
 
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
+
+  /// Whether or not the user can drag single line text fields.
+  ///
+  /// By default, true on Android and false on iOS.
+  final bool canDragSingleLineField;
 
   /// {@macro flutter.rendering.editable.selectionEnabled}
   bool get selectionEnabled {
@@ -1195,6 +1201,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       controller: _scrollController,
       physics: const ClampingScrollPhysics(),
       dragStartBehavior: widget.dragStartBehavior,
+      canDrag: _isMultiline ? true : widget.canDragSingleLineField,
       viewportBuilder: (BuildContext context, ViewportOffset offset) {
         return CompositedTransformTarget(
           link: _layerLink,

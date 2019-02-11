@@ -707,6 +707,8 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
 
   bool get _paintCursorAboveText => Theme.of(context).platform == TargetPlatform.iOS ? true : false;
 
+  bool get _canDragSingleLineField => Theme.of(context).platform == TargetPlatform.iOS ? false : true;
+
   Color get _cursorColor {
     if (widget.cursorColor == null) {
       if (Theme.of(context).platform == TargetPlatform.iOS)
@@ -799,6 +801,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         keyboardAppearance: keyboardAppearance,
         enableInteractiveSelection: widget.enableInteractiveSelection,
         dragStartBehavior: widget.dragStartBehavior,
+        canDragSingleLineField: _canDragSingleLineField,
       ),
     );
 

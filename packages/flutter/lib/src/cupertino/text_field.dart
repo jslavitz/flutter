@@ -651,6 +651,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
           backgroundCursorColor: CupertinoColors.inactiveGray,
           scrollPadding: widget.scrollPadding,
           keyboardAppearance: keyboardAppearance,
+          canDragSingleLineField: true,
         ),
       ),
     );
