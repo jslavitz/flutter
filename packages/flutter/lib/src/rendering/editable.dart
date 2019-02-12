@@ -708,6 +708,8 @@ class RenderEditable extends RenderBox {
       return;
     _selection = value;
     _selectionRects = null;
+    print('now prinignt statcl ' + selection.extent.toString());
+//    debugPrintStack();
     markNeedsPaint();
     markNeedsSemanticsUpdate();
   }
@@ -1528,7 +1530,7 @@ class RenderEditable extends RenderBox {
   void _paintContents(PaintingContext context, Offset offset) {
     assert(_textLayoutLastWidth == constraints.maxWidth);
     final Offset effectiveOffset = offset + _paintOffset;
-
+print(_selection.extent);
     // On iOS, the cursor is painted over the text, on Android, it's painted
     // under it.
     if (paintCursorAboveText)

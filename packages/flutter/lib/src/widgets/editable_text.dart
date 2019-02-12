@@ -794,6 +794,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   TextEditingValue get _value => widget.controller.value;
   set _value(TextEditingValue value) {
+    print('setting value' +  value.selection.extent.toString());
+    debugPrintStack();
     widget.controller.value = value;
   }
 
@@ -1120,12 +1122,17 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       if (_canDrag) {
         _showCaretOnScreen();
       } else {
-        print('hererer');
-        widget.controller.selection = TextSelection.collapsed(offset: _value.text.length - 1);
+        final TextSelection newSelection = TextSelection.collapsed(offset: renderEditable.text.text.length);
+        widget.controller.value = TextEditingValue(
+          text: widget.controller.value.text,
+          selection: newSelection,
+          composing: widget.controller.value.composing
+        );
+        print('new selection extent ' + _value.selection.extent.toString());
         _showCaretOnScreen(animateToPosition: false);
+        widget.controller.selection = newSelection;
       }
       if (!_value.selection.isValid) {
-        print('invalid');
         // Place cursor at the end if the selection is invalid when we receive focus.
         widget.controller.selection = TextSelection.collapsed(offset: _value.text.length);
       }
