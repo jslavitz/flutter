@@ -4,18 +4,15 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart';
-import 'dart:ui' as ui;
 import 'package:flutter/cupertino.dart';
 //void main() => runApp(const Center(child: Text('Hello, world!', textDirection: TextDirection.ltr)));
 
 void main() {
-  runApp(TestWidget());
+  runApp(const TestWidget());
 }
 
-
 class TestWidget extends StatefulWidget {
-
-  TestWidget();
+  const TestWidget();
 
   @override
   TestWidgetState createState() => TestWidgetState();
@@ -46,7 +43,7 @@ class TestWidgetState extends State<TestWidget> {
               child: Material(
                 elevation: 20.0,
                 color: Colors.lightBlue,
-                shape: SuperEllipseRoundedRectangleBorder(
+                shape: CupertinoRoundedRectangleBorder(
                   borderRadius: radius,
                   mode: mode,
                 ),
