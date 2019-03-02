@@ -21,13 +21,13 @@ class TestWidget extends StatefulWidget {
 class TestWidgetState extends State<TestWidget> {
 
   double radius = 85.0;
+  double borderRadius = 20.0;
   double width = 200.0;
   double height = 200.0;
 
   final double max = 200.0;
 
-  RoundedRectCornerMode mode = RoundedRectCornerMode.dynamicShape;
-  bool isRoundedCornerMode = false;
+  bool useBorder = true;
 
   @override
   Widget build(BuildContext context) {
@@ -43,9 +43,8 @@ class TestWidgetState extends State<TestWidget> {
               child: Material(
                 elevation: 20.0,
                 color: Colors.lightBlue,
-                shape: CupertinoRoundedRectangleBorder(
-                  borderRadius: radius,
-                  mode: mode,
+                shape: ContinuousRectangleBorder(
+                  cornerRadius: radius,
                 ),
                 child: Container(
                   width: width,
@@ -56,56 +55,57 @@ class TestWidgetState extends State<TestWidget> {
             Container(
               child: Column(
                 children: <Widget>[
+                  CupertinoButton(
+                    child: Text('Switch Border'),
+                    onPressed: (){
+                      setState(() {
+                        useBorder = !useBorder;
+                      });
+                    },
+                  ),
                   Text('Radius: ' + radius.toString()),
                   CupertinoSlider(
-                    min: 0,
-                    max: 85,
-                    value: radius,
-                    onChanged: (double value) {
-                       setState(() {
-                         radius = value;
-                       });
-                    }
+                      min: 0,
+                      max: 85,
+                      value: radius,
+                      onChanged: (double value) {
+                        setState(() {
+                          radius = value;
+                        });
+                      }
+                  ),
+                  Text('BorderRadius: ' + borderRadius.toString()),
+                  CupertinoSlider(
+                      min: 0,
+                      max: 85,
+                      value: borderRadius,
+                      onChanged: (double value) {
+                        setState(() {
+                          borderRadius = value;
+                        });
+                      }
                   ),
                   Text('Width: ' + width.toString()),
                   CupertinoSlider(
-                    max: max,
-                    min: 0,
-                    value: width,
-                    onChanged: (double value) {
-                      setState(() {
-                        width = value;
-                      });
-                    }
+                      max: max,
+                      min: 0,
+                      value: width,
+                      onChanged: (double value) {
+                        setState(() {
+                          width = value;
+                        });
+                      }
                   ),
                   Text('Height: ' + height.toString()),
                   CupertinoSlider(
-                    max: max,
-                    min: 0,
-                    value: height,
-                    onChanged: (double value) {
-                      setState(() {
-                        height = value;
-                        print(height);
-                      });
-                    }
-                  ),
-                  Container(
-                    height: 120,
-                    child: CupertinoPicker(
-                      backgroundColor: Colors.white12,
-                      itemExtent: 30,
-                      children: const <Widget>[
-                        Text('Dynamic Shape'),
-                        Text('Dynamic Radius'),
-                      ],
-                      onSelectedItemChanged: (int item) {
+                      max: max,
+                      min: 0,
+                      value: height,
+                      onChanged: (double value) {
                         setState(() {
-                          mode = item == 0 ? RoundedRectCornerMode.dynamicShape :
-                            RoundedRectCornerMode.dynamicRadius;
+                          height = value;
                         });
-                      },
-                    ),
+                      }
                   ),
                 ],
               ),
