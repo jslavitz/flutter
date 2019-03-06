@@ -356,7 +356,8 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
   RenderSliverFloatingPersistentHeader({
     RenderBox child,
     FloatingHeaderSnapConfiguration snapConfiguration,
-  }) : _snapConfiguration = snapConfiguration, super(child: child);
+  }) : _snapConfiguration = snapConfiguration,
+       super(child: child);
 
   AnimationController _controller;
   Animation<double> _animation;
@@ -393,6 +394,7 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
       return;
     if (value == null) {
       _controller?.dispose();
+      _controller = null;
     } else {
       if (_snapConfiguration != null && value.vsync != _snapConfiguration.vsync)
         _controller?.resync(value.vsync);
@@ -522,6 +524,7 @@ abstract class RenderSliverFloatingPinnedPersistentHeader extends RenderSliverFl
     final double layoutExtent = maxExtent - constraints.scrollOffset;
     geometry = SliverGeometry(
       scrollExtent: maxExtent,
+      paintOrigin: math.min(constraints.overlap, 0.0),
       paintExtent: clampedPaintExtent,
       layoutExtent: layoutExtent.clamp(0.0, clampedPaintExtent),
       maxPaintExtent: maxExtent,

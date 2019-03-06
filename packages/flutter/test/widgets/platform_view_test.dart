@@ -36,7 +36,7 @@ void main() {
         viewsController.views,
         unorderedEquals(<FakeAndroidPlatformView>[
           FakeAndroidPlatformView(currentViewId + 1, 'webview', const Size(200.0, 100.0),
-              AndroidViewController.kAndroidLayoutDirectionLtr)
+              AndroidViewController.kAndroidLayoutDirectionLtr),
         ]),
       );
     });
@@ -66,7 +66,7 @@ void main() {
       final ByteData byteData = ByteData.view(
           rawCreationParams.buffer,
           rawCreationParams.offsetInBytes,
-          rawCreationParams.lengthInBytes
+          rawCreationParams.lengthInBytes,
       );
       final dynamic actualParams = const StringCodec().decodeMessage(byteData);
 
@@ -75,7 +75,7 @@ void main() {
         viewsController.views,
         unorderedEquals(<FakeAndroidPlatformView>[
           FakeAndroidPlatformView(currentViewId + 1, 'webview', const Size(200.0, 100.0),
-              AndroidViewController.kAndroidLayoutDirectionLtr, fakeView.creationParams)
+              AndroidViewController.kAndroidLayoutDirectionLtr, fakeView.creationParams),
         ]),
       );
     });
@@ -134,7 +134,7 @@ void main() {
         viewsController.views,
         unorderedEquals(<FakeAndroidPlatformView>[
           FakeAndroidPlatformView(currentViewId + 1, 'webview', const Size(200.0, 100.0),
-              AndroidViewController.kAndroidLayoutDirectionLtr)
+              AndroidViewController.kAndroidLayoutDirectionLtr),
         ]),
       );
 
@@ -145,7 +145,7 @@ void main() {
         viewsController.views,
         unorderedEquals(<FakeAndroidPlatformView>[
           FakeAndroidPlatformView(currentViewId + 1, 'webview', const Size(100.0, 50.0),
-              AndroidViewController.kAndroidLayoutDirectionLtr)
+              AndroidViewController.kAndroidLayoutDirectionLtr),
         ]),
       );
     });
@@ -179,7 +179,7 @@ void main() {
         viewsController.views,
         unorderedEquals(<FakeAndroidPlatformView>[
           FakeAndroidPlatformView(currentViewId + 2, 'maps', const Size(200.0, 100.0),
-              AndroidViewController.kAndroidLayoutDirectionLtr)
+              AndroidViewController.kAndroidLayoutDirectionLtr),
         ]),
       );
     });
@@ -243,7 +243,7 @@ void main() {
         viewsController.views,
         unorderedEquals(<FakeAndroidPlatformView>[
           FakeAndroidPlatformView(currentViewId + 1, 'webview', const Size(200.0, 100.0),
-              AndroidViewController.kAndroidLayoutDirectionLtr)
+              AndroidViewController.kAndroidLayoutDirectionLtr),
         ]),
       );
     });
@@ -318,7 +318,7 @@ void main() {
       );
       expect(
           numPointerDownsOnParent,
-          1
+          1,
       );
     });
 
@@ -366,7 +366,7 @@ void main() {
       );
       expect(
           numPointerDownsOnParent,
-          1
+          1,
       );
     });
 
@@ -414,12 +414,11 @@ void main() {
       );
       expect(
           numPointerDownsOnParent,
-          0
+          0,
       );
     });
 
-    testWidgets('Android view touch events are in virtual display\'s coordinate system', (
-        WidgetTester tester) async {
+    testWidgets('Android view touch events are in virtual display\'s coordinate system', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
       viewsController.registerViewType('webview');
@@ -469,7 +468,7 @@ void main() {
         viewsController.views,
         unorderedEquals(<FakeAndroidPlatformView>[
           FakeAndroidPlatformView(currentViewId + 1, 'maps', const Size(200.0, 100.0),
-              AndroidViewController.kAndroidLayoutDirectionRtl)
+              AndroidViewController.kAndroidLayoutDirectionRtl),
         ]),
       );
 
@@ -487,7 +486,7 @@ void main() {
         viewsController.views,
         unorderedEquals(<FakeAndroidPlatformView>[
           FakeAndroidPlatformView(currentViewId + 1, 'maps', const Size(200.0, 100.0),
-              AndroidViewController.kAndroidLayoutDirectionLtr)
+              AndroidViewController.kAndroidLayoutDirectionLtr),
         ]),
       );
     });
@@ -513,7 +512,7 @@ void main() {
         viewsController.views,
         unorderedEquals(<FakeAndroidPlatformView>[
           FakeAndroidPlatformView(currentViewId + 1, 'maps', const Size(200.0, 100.0),
-              AndroidViewController.kAndroidLayoutDirectionRtl)
+              AndroidViewController.kAndroidLayoutDirectionRtl),
         ]),
       );
 
@@ -534,7 +533,7 @@ void main() {
         viewsController.views,
         unorderedEquals(<FakeAndroidPlatformView>[
           FakeAndroidPlatformView(currentViewId + 1, 'maps', const Size(200.0, 100.0),
-              AndroidViewController.kAndroidLayoutDirectionLtr)
+              AndroidViewController.kAndroidLayoutDirectionLtr),
         ]),
       );
     });
@@ -755,8 +754,7 @@ void main() {
       );
     });
 
-    testWidgets('RenderAndroidView reconstructed with same gestureRecognizers', (
-        WidgetTester tester) async {
+    testWidgets('RenderAndroidView reconstructed with same gestureRecognizers', (WidgetTester tester) async {
       final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
       viewsController.registerViewType('webview');
 
@@ -817,7 +815,7 @@ void main() {
       viewsController.registerViewType('webview');
 
       await tester.pumpWidget(
-        Center(
+        const Center(
           child: SizedBox(
             width: 200.0,
             height: 100.0,
@@ -829,7 +827,7 @@ void main() {
       expect(
         viewsController.views,
         unorderedEquals(<FakeUiKitView>[
-          FakeUiKitView(currentViewId + 1, 'webview')
+          FakeUiKitView(currentViewId + 1, 'webview'),
         ]),
       );
     });
@@ -840,7 +838,7 @@ void main() {
       viewsController.registerViewType('webview');
       viewsController.registerViewType('maps');
       await tester.pumpWidget(
-        Center(
+        const Center(
           child: SizedBox(
             width: 200.0,
             height: 100.0,
@@ -850,7 +848,7 @@ void main() {
       );
 
       await tester.pumpWidget(
-        Center(
+        const Center(
           child: SizedBox(
             width: 200.0,
             height: 100.0,
@@ -862,7 +860,7 @@ void main() {
       expect(
         viewsController.views,
         unorderedEquals(<FakeUiKitView>[
-          FakeUiKitView(currentViewId + 2, 'maps')
+          FakeUiKitView(currentViewId + 2, 'maps'),
         ]),
       );
     });
@@ -871,7 +869,7 @@ void main() {
       final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
       viewsController.registerViewType('webview');
       await tester.pumpWidget(
-        Center(
+        const Center(
           child: SizedBox(
             width: 200.0,
             height: 100.0,
@@ -900,7 +898,7 @@ void main() {
       viewsController.registerViewType('webview');
       viewsController.creationDelay = Completer<void>();
       await tester.pumpWidget(
-        Center(
+        const Center(
           child: SizedBox(
             width: 200.0,
             height: 100.0,
@@ -956,7 +954,7 @@ void main() {
       expect(
         viewsController.views,
         unorderedEquals(<FakeUiKitView>[
-          FakeUiKitView(currentViewId + 1, 'webview')
+          FakeUiKitView(currentViewId + 1, 'webview'),
         ]),
       );
     });
@@ -967,7 +965,7 @@ void main() {
       viewsController.registerViewType('webview');
 
       await tester.pumpWidget(
-        Center(
+        const Center(
           child: SizedBox(
             width: 200.0,
             height: 100.0,
@@ -975,7 +973,7 @@ void main() {
               viewType: 'webview',
               layoutDirection: TextDirection.ltr,
               creationParams: 'creation parameters',
-              creationParamsCodec: const StringCodec(),
+              creationParamsCodec: StringCodec(),
             ),
           ),
         ),
@@ -986,7 +984,7 @@ void main() {
       final ByteData byteData = ByteData.view(
           rawCreationParams.buffer,
           rawCreationParams.offsetInBytes,
-          rawCreationParams.lengthInBytes
+          rawCreationParams.lengthInBytes,
       );
       final dynamic actualParams = const StringCodec().decodeMessage(byteData);
 
@@ -994,7 +992,7 @@ void main() {
       expect(
         viewsController.views,
         unorderedEquals(<FakeUiKitView>[
-          FakeUiKitView(currentViewId + 1, 'webview', fakeView.creationParams)
+          FakeUiKitView(currentViewId + 1, 'webview', fakeView.creationParams),
         ]),
       );
     });
@@ -1005,7 +1003,7 @@ void main() {
       viewsController.registerViewType('webview');
 
       await tester.pumpWidget(
-        Align(
+        const Align(
           alignment: Alignment.topLeft,
           child: SizedBox(
             width: 200.0,
@@ -1044,7 +1042,7 @@ void main() {
                   numPointerDownsOnParent++;
                 },
               ),
-              Positioned(
+              const Positioned(
                 child: SizedBox(
                   width: 200.0,
                   height: 100.0,
@@ -1089,7 +1087,7 @@ void main() {
                   numPointerDownsOnParent++;
                 },
               ),
-              Positioned(
+              const Positioned(
                 child: SizedBox(
                   width: 200.0,
                   height: 100.0,
@@ -1134,7 +1132,7 @@ void main() {
                   numPointerDownsOnParent++;
                 },
               ),
-              Positioned(
+              const Positioned(
                 child: SizedBox(
                   width: 200.0,
                   height: 100.0,
@@ -1176,7 +1174,7 @@ void main() {
               onVerticalDragStart: (DragStartDetails d) {
                 verticalDragAcceptedByParent = true;
               },
-              child: SizedBox(
+              child: const SizedBox(
                 width: 200.0,
                 height: 100.0,
                 child: UiKitView(viewType: 'webview', layoutDirection: TextDirection.ltr),
@@ -1196,6 +1194,7 @@ void main() {
 
       expect(verticalDragAcceptedByParent, true);
       expect(viewsController.gesturesAccepted[currentViewId + 1], 0);
+      expect(viewsController.gesturesRejected[currentViewId + 1], 1);
     });
 
     testWidgets('UiKitView gesture recognizers', (WidgetTester tester) async {
@@ -1237,6 +1236,7 @@ void main() {
 
       expect(verticalDragAcceptedByParent, false);
       expect(viewsController.gesturesAccepted[currentViewId + 1], 1);
+      expect(viewsController.gesturesRejected[currentViewId + 1], 0);
     });
 
     testWidgets('UiKitView can claim gesture after all pointers are up', (WidgetTester tester) async {
@@ -1254,7 +1254,7 @@ void main() {
               verticalDragAcceptedByParent = true;
             },
             onLongPress: () {},
-            child: SizedBox(
+            child: const SizedBox(
               width: 200.0,
               height: 100.0,
               child: UiKitView(
@@ -1276,6 +1276,7 @@ void main() {
       expect(verticalDragAcceptedByParent, false);
 
       expect(viewsController.gesturesAccepted[currentViewId + 1], 1);
+      expect(viewsController.gesturesRejected[currentViewId + 1], 0);
     });
 
     testWidgets('UiKitView rebuilt during gesture', (WidgetTester tester) async {
@@ -1283,7 +1284,7 @@ void main() {
       final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
       viewsController.registerViewType('webview');
       await tester.pumpWidget(
-        Align(
+        const Align(
           alignment: Alignment.topLeft,
           child: SizedBox(
             width: 200.0,
@@ -1304,7 +1305,7 @@ void main() {
       await gesture.moveBy(const Offset(0.0, 100.0));
 
       await tester.pumpWidget(
-        Align(
+        const Align(
           alignment: Alignment.topLeft,
           child: SizedBox(
             width: 200.0,
@@ -1320,6 +1321,7 @@ void main() {
       await gesture.up();
 
       expect(viewsController.gesturesAccepted[currentViewId + 1], 1);
+      expect(viewsController.gesturesRejected[currentViewId + 1], 0);
     });
 
     testWidgets('UiKitView with eager gesture recognizer', (WidgetTester tester) async {
@@ -1359,6 +1361,37 @@ void main() {
       // the Android view). Here we assert that with the eager recognizer in the gesture team the
       // pointer down event is immediately dispatched.
       expect(viewsController.gesturesAccepted[currentViewId + 1], 1);
+      expect(viewsController.gesturesRejected[currentViewId + 1], 0);
+    });
+
+    testWidgets('UiKitView rejects gestures absorbed by siblings', (WidgetTester tester) async {
+      final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+      final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
+      viewsController.registerViewType('webview');
+
+      await tester.pumpWidget(
+        Stack(
+          alignment: Alignment.topLeft,
+          children: <Widget>[
+            const UiKitView(viewType: 'webview', layoutDirection: TextDirection.ltr),
+            Container(
+              color: const Color.fromARGB(255, 255, 255, 255),
+              width: 100,
+              height: 100,
+            ),
+          ],
+        )
+      );
+
+      // First frame is before the platform view was created so the render object
+      // is not yet in the tree.
+      await tester.pump();
+
+      final TestGesture gesture = await tester.startGesture(const Offset(50.0, 50.0));
+      await gesture.up();
+
+      expect(viewsController.gesturesRejected[currentViewId + 1], 1);
+      expect(viewsController.gesturesAccepted[currentViewId + 1], 0);
     });
 
     testWidgets('AndroidView rebuilt with same gestureRecognizers', (WidgetTester tester) async {

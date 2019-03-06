@@ -8,6 +8,7 @@ import 'dart:math' as math;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 import 'button_bar.dart';
 import 'button_theme.dart';
@@ -23,6 +24,9 @@ import 'material.dart';
 import 'material_localizations.dart';
 import 'text_theme.dart';
 import 'theme.dart';
+
+// Examples can assume:
+// BuildContext context;
 
 /// Initial display mode of the date picker dialog.
 ///
@@ -250,10 +254,12 @@ class DayPicker extends StatelessWidget {
     @required this.lastDate,
     @required this.displayedMonth,
     this.selectableDayPredicate,
+    this.dragStartBehavior = DragStartBehavior.start,
   }) : assert(selectedDate != null),
        assert(currentDate != null),
        assert(onChanged != null),
        assert(displayedMonth != null),
+       assert(dragStartBehavior != null),
        assert(!firstDate.isAfter(lastDate)),
        assert(selectedDate.isAfter(firstDate) || selectedDate.isAtSameMomentAs(firstDate)),
        super(key: key);
@@ -280,6 +286,24 @@ class DayPicker extends StatelessWidget {
 
   /// Optional user supplied predicate function to customize selectable days.
   final SelectableDayPredicate selectableDayPredicate;
+
+  /// Determines the way that drag start behavior is handled.
+  ///
+  /// If set to [DragStartBehavior.start], the drag gesture used to scroll a
+  /// date picker wheel will begin upon the detection of a drag gesture. If set
+  /// to [DragStartBehavior.down] it will begin when a down event is first
+  /// detected.
+  ///
+  /// In general, setting this to [DragStartBehavior.start] will make drag
+  /// animation smoother and setting it to [DragStartBehavior.down] will make
+  /// drag behavior feel slightly more reactive.
+  ///
+  /// By default, the drag start behavior is [DragStartBehavior.start].
+  ///
+  /// See also:
+  ///
+  ///  * [DragGestureRecognizer.dragStartBehavior], which gives an example for the different behaviors.
+  final DragStartBehavior dragStartBehavior;
 
   /// Builds widgets showing abbreviated days of week. The first widget in the
   /// returned list corresponds to the first day of week for the current locale.
@@ -407,7 +431,7 @@ class DayPicker extends StatelessWidget {
           itemStyle = themeData.accentTextTheme.body2;
           decoration = BoxDecoration(
             color: themeData.accentColor,
-            shape: BoxShape.circle
+            shape: BoxShape.circle,
           );
         } else if (disabled) {
           itemStyle = themeData.textTheme.body1.copyWith(color: themeData.disabledColor);
@@ -442,6 +466,7 @@ class DayPicker extends StatelessWidget {
               onChanged(dayToBuild);
             },
             child: dayWidget,
+            dragStartBehavior: dragStartBehavior,
           );
         }
 
@@ -502,6 +527,7 @@ class MonthPicker extends StatefulWidget {
     @required this.firstDate,
     @required this.lastDate,
     this.selectableDayPredicate,
+    this.dragStartBehavior = DragStartBehavior.start,
   }) : assert(selectedDate != null),
        assert(onChanged != null),
        assert(!firstDate.isAfter(lastDate)),
@@ -525,6 +551,9 @@ class MonthPicker extends StatefulWidget {
   /// Optional user supplied predicate function to customize selectable days.
   final SelectableDayPredicate selectableDayPredicate;
 
+  /// {@macro flutter.widgets.scrollable.dragStartBehavior}
+  final DragStartBehavior dragStartBehavior;
+
   @override
   _MonthPickerState createState() => _MonthPickerState();
 }
@@ -544,7 +573,7 @@ class _MonthPickerState extends State<MonthPicker> with SingleTickerProviderStat
 
     // Setup the fade animation for chevrons
     _chevronOpacityController = AnimationController(
-      duration: const Duration(milliseconds: 250), vsync: this
+      duration: const Duration(milliseconds: 250), vsync: this,
     );
     _chevronOpacityAnimation = _chevronOpacityController.drive(_chevronOpacityTween);
   }
@@ -609,6 +638,7 @@ class _MonthPickerState extends State<MonthPicker> with SingleTickerProviderStat
       lastDate: widget.lastDate,
       displayedMonth: month,
       selectableDayPredicate: widget.selectableDayPredicate,
+      dragStartBehavior: widget.dragStartBehavior,
     );
   }
 
@@ -669,6 +699,7 @@ class _MonthPickerState extends State<MonthPicker> with SingleTickerProviderStat
                   return false;
                 },
                 child: PageView.builder(
+                  dragStartBehavior: widget.dragStartBehavior,
                   key: ValueKey<DateTime>(widget.selectedDate),
                   controller: _dayPickerController,
                   scrollDirection: Axis.horizontal,
@@ -759,6 +790,7 @@ class YearPicker extends StatefulWidget {
     @required this.onChanged,
     @required this.firstDate,
     @required this.lastDate,
+    this.dragStartBehavior = DragStartBehavior.start,
   }) : assert(selectedDate != null),
        assert(onChanged != null),
        assert(!firstDate.isAfter(lastDate)),
@@ -777,6 +809,9 @@ class YearPicker extends StatefulWidget {
 
   /// The latest date the user is permitted to pick.
   final DateTime lastDate;
+
+  /// {@macro flutter.widgets.scrollable.dragStartBehavior}
+  final DragStartBehavior dragStartBehavior;
 
   @override
   _YearPickerState createState() => _YearPickerState();
@@ -801,6 +836,7 @@ class _YearPickerState extends State<YearPicker> {
     final ThemeData themeData = Theme.of(context);
     final TextStyle style = themeData.textTheme.body1;
     return ListView.builder(
+      dragStartBehavior: widget.dragStartBehavior,
       controller: scrollController,
       itemExtent: _itemExtent,
       itemCount: widget.lastDate.year - widget.firstDate.year + 1,
@@ -902,6 +938,13 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
   }
 
   void _handleYearChanged(DateTime value) {
+    if (value.isBefore(widget.firstDate))
+      value = widget.firstDate;
+    else if (value.isAfter(widget.lastDate))
+      value = widget.lastDate;
+    if (value == _selectedDate)
+      return;
+
     _vibrate();
     setState(() {
       _mode = DatePickerMode.day;
@@ -1029,7 +1072,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
           }
           return null;
         }
-      )
+      ),
     );
 
     return Theme(
@@ -1067,8 +1110,33 @@ typedef SelectableDayPredicate = bool Function(DateTime day);
 /// provided by [Directionality]. If both [locale] and [textDirection] are not
 /// null, [textDirection] overrides the direction chosen for the [locale].
 ///
-/// The `context` argument is passed to [showDialog], the documentation for
+/// The [context] argument is passed to [showDialog], the documentation for
 /// which discusses how it is used.
+///
+/// The [builder] parameter can be used to wrap the dialog widget
+/// to add inherited widgets like [Theme].
+///
+/// {@tool sample}
+/// Show a date picker with the dark theme.
+///
+/// ```dart
+/// Future<DateTime> selectedDate = showDatePicker(
+///   context: context,
+///   initialDate: DateTime.now(),
+///   firstDate: DateTime(2018),
+///   lastDate: DateTime(2030),
+///   builder: (BuildContext context, Widget child) {
+///     return Theme(
+///       data: ThemeData.dark(),
+///       child: child,
+///     );
+///   },
+/// );
+/// ```
+/// {@end-tool}
+///
+/// The [context], [initialDate], [firstDate], and [lastDate] parameters must
+/// not be null.
 ///
 /// See also:
 ///
@@ -1089,7 +1157,11 @@ Future<DateTime> showDatePicker({
   DatePickerMode initialDatePickerMode = DatePickerMode.day,
   Locale locale,
   TextDirection textDirection,
+  TransitionBuilder builder,
 }) async {
+  assert(initialDate != null);
+  assert(firstDate != null);
+  assert(lastDate != null);
   assert(!initialDate.isBefore(firstDate), 'initialDate must be on or after firstDate');
   assert(!initialDate.isAfter(lastDate), 'initialDate must be on or before lastDate');
   assert(!firstDate.isAfter(lastDate), 'lastDate must be on or after firstDate');
@@ -1126,6 +1198,8 @@ Future<DateTime> showDatePicker({
 
   return await showDialog<DateTime>(
     context: context,
-    builder: (BuildContext context) => child,
+    builder: (BuildContext context) {
+      return builder == null ? child : builder(context, child);
+    },
   );
 }

@@ -73,7 +73,7 @@ enum _RefreshIndicatorMode {
 ///
 /// See also:
 ///
-///  * <https://material.google.com/patterns/swipe-to-refresh.html>
+///  * <https://material.io/design/platform-guidance/android-swipe-to-refresh.html>
 ///  * [RefreshIndicatorState], can be used to programmatically show the refresh indicator.
 ///  * [RefreshProgressIndicator], widget used by [RefreshIndicator] to show
 ///    the inner circular progress spinner during refreshes.
@@ -189,7 +189,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
     _valueColor = _positionController.drive(
       ColorTween(
         begin: (widget.color ?? theme.accentColor).withOpacity(0.0),
-        end: (widget.color ?? theme.accentColor).withOpacity(1.0)
+        end: (widget.color ?? theme.accentColor).withOpacity(1.0),
       ).chain(CurveTween(
         curve: const Interval(0.0, 1.0 / _kDragSizeFactorLimit)
       )),

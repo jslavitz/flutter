@@ -40,9 +40,11 @@ const double _kCloseProgressThreshold = 0.5;
 ///
 /// See also:
 ///
-///  * [ScaffoldState.showBottomSheet]
-///  * [showModalBottomSheet]
-///  * <https://material.google.com/components/bottom-sheets.html>
+///  * [showBottomSheet] and [ScaffoldState.showBottomSheet], for showing
+///    non-modal "persistent" bottom sheets.
+///  * [showModalBottomSheet], which can be used to display a modal bottom
+///    sheet.
+///  * <https://material.io/design/components/sheets-bottom.html>
 class BottomSheet extends StatefulWidget {
   /// Creates a bottom sheet.
   ///
@@ -55,7 +57,7 @@ class BottomSheet extends StatefulWidget {
     this.enableDrag = true,
     this.elevation = 0.0,
     @required this.onClosing,
-    @required this.builder
+    @required this.builder,
   }) : assert(enableDrag != null),
        assert(onClosing != null),
        assert(builder != null),
@@ -82,7 +84,7 @@ class BottomSheet extends StatefulWidget {
   final WidgetBuilder builder;
 
   /// If true, the bottom sheet can dragged up and down and dismissed by swiping
-  /// downards.
+  /// downwards.
   ///
   /// Default is true.
   final bool enableDrag;
@@ -176,7 +178,7 @@ class _ModalBottomSheetLayout extends SingleChildLayoutDelegate {
       minWidth: constraints.maxWidth,
       maxWidth: constraints.maxWidth,
       minHeight: 0.0,
-      maxHeight: constraints.maxHeight * 9.0 / 16.0
+      maxHeight: constraints.maxHeight * 9.0 / 16.0,
     );
   }
 
@@ -241,8 +243,8 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
               ),
             ),
           );
-        }
-      )
+        },
+      ),
     );
   }
 }
@@ -319,7 +321,7 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
 ///    passed as the `builder` argument to [showModalBottomSheet].
 ///  * [showBottomSheet] and [ScaffoldState.showBottomSheet], for showing
 ///    non-modal bottom sheets.
-///  * <https://material.google.com/components/bottom-sheets.html#bottom-sheets-modal-bottom-sheets>
+///  * <https://material.io/design/components/sheets-bottom.html#modal-bottom-sheet>
 Future<T> showModalBottomSheet<T>({
   @required BuildContext context,
   @required WidgetBuilder builder,
@@ -370,7 +372,7 @@ Future<T> showModalBottomSheet<T>({
 ///  * [showModalBottomSheet], which can be used to display a modal bottom
 ///    sheet.
 ///  * [Scaffold.of], for information about how to obtain the [BuildContext].
-///  * <https://material.google.com/components/bottom-sheets.html#bottom-sheets-persistent-bottom-sheets>
+///  * <https://material.io/design/components/sheets-bottom.html#standard-bottom-sheet>
 PersistentBottomSheetController<T> showBottomSheet<T>({
   @required BuildContext context,
   @required WidgetBuilder builder,

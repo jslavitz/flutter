@@ -262,27 +262,46 @@ abstract class ImageProvider<T> {
     assert(configuration != null);
     final ImageStream stream = ImageStream();
     T obtainedKey;
-    obtainKey(configuration).then<void>((T key) {
-      obtainedKey = key;
-      stream.setCompleter(PaintingBinding.instance.imageCache.putIfAbsent(key, () => load(key)));
-    }).catchError(
-      (dynamic exception, StackTrace stack) async {
-        FlutterError.reportError(FlutterErrorDetails(
-          exception: exception,
-          stack: stack,
-          library: 'services library',
-          context: 'while resolving an image',
-          silent: true, // could be a network error or whatnot
-          informationCollector: (StringBuffer information) {
-            information.writeln('Image provider: $this');
-            information.writeln('Image configuration: $configuration');
-            if (obtainedKey != null)
-              information.writeln('Image key: $obtainedKey');
+    Future<void> handleError(dynamic exception, StackTrace stack) async {
+      await null; // wait an event turn in case a listener has been added to the image stream.
+      final _ErrorImageCompleter imageCompleter = _ErrorImageCompleter();
+      stream.setCompleter(imageCompleter);
+      imageCompleter.setError(
+        exception: exception,
+        stack: stack,
+        context: 'while resolving an image',
+        silent: true, // could be a network error or whatnot
+        informationCollector: (StringBuffer information) {
+          information.writeln('Image provider: $this');
+          information.writeln('Image configuration: $configuration');
+          if (obtainedKey != null) {
+            information.writeln('Image key: $obtainedKey');
           }
-        ));
-        return null;
+        },
+      );
+    }
+
+    // `obtainKey` can throw both sync and async errors.
+    // `catchError` handles cases where async errors are thrown and the try block is for sync errors.
+    //
+    // `onError` callback on [ImageCache] handles the cases where `obtainKey` is a sync future and `load` throws.
+    Future<T> key;
+    try {
+      key = obtainKey(configuration);
+    } catch (error, stackTrace) {
+      handleError(error, stackTrace);
+      return stream;
+    }
+
+    key.then<void>((T key) {
+      obtainedKey = key;
+      final ImageStreamCompleter completer = PaintingBinding.instance
+          .imageCache.putIfAbsent(key, () => load(key), onError: handleError);
+      if (completer != null) {
+        stream.setCompleter(completer);
       }
-    );
+    }).catchError(handleError);
+
     return stream;
   }
 
@@ -303,7 +322,7 @@ abstract class ImageProvider<T> {
   /// {@tool sample}
   ///
   /// The following sample code shows how an image loaded using the [Image]
-  /// widget can be evicted using a [NetworkImage] with a matching url.
+  /// widget can be evicted using a [NetworkImage] with a matching URL.
   ///
   /// ```dart
   /// class MyWidget extends StatelessWidget {
@@ -324,7 +343,7 @@ abstract class ImageProvider<T> {
   /// }
   /// ```
   /// {@end-tool}
-  Future<bool> evict({ImageCache cache, ImageConfiguration configuration = ImageConfiguration.empty}) async {
+  Future<bool> evict({ ImageCache cache, ImageConfiguration configuration = ImageConfiguration.empty }) async {
     cache ??= imageCache;
     final T key = await obtainKey(configuration);
     return cache.evict(key);
@@ -362,7 +381,7 @@ class AssetBundleImageKey {
   const AssetBundleImageKey({
     @required this.bundle,
     @required this.name,
-    @required this.scale
+    @required this.scale,
   }) : assert(bundle != null),
        assert(name != null),
        assert(scale != null);
@@ -416,7 +435,7 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
       informationCollector: (StringBuffer information) {
         information.writeln('Image provider: $this');
         information.write('Image key: $key');
-      }
+      },
     );
   }
 
@@ -448,8 +467,8 @@ class NetworkImage extends ImageProvider<NetworkImage> {
   ///
   /// The arguments must not be null.
   const NetworkImage(this.url, { this.scale = 1.0 , this.headers })
-      : assert(url != null),
-        assert(scale != null);
+    : assert(url != null),
+      assert(scale != null);
 
   /// The URL from which the image will be fetched.
   final String url;
@@ -473,7 +492,7 @@ class NetworkImage extends ImageProvider<NetworkImage> {
       informationCollector: (StringBuffer information) {
         information.writeln('Image provider: $this');
         information.write('Image key: $key');
-      }
+      },
     );
   }
 
@@ -495,7 +514,7 @@ class NetworkImage extends ImageProvider<NetworkImage> {
     if (bytes.lengthInBytes == 0)
       throw Exception('NetworkImage is an empty file: $resolved');
 
-    return await PaintingBinding.instance.instantiateImageCodec(bytes);
+    return PaintingBinding.instance.instantiateImageCodec(bytes);
   }
 
   @override
@@ -525,8 +544,8 @@ class FileImage extends ImageProvider<FileImage> {
   ///
   /// The arguments must not be null.
   const FileImage(this.file, { this.scale = 1.0 })
-      : assert(file != null),
-        assert(scale != null);
+    : assert(file != null),
+      assert(scale != null);
 
   /// The file to decode into an image.
   final File file;
@@ -546,7 +565,7 @@ class FileImage extends ImageProvider<FileImage> {
       scale: key.scale,
       informationCollector: (StringBuffer information) {
         information.writeln('Path: ${file?.path}');
-      }
+      },
     );
   }
 
@@ -593,8 +612,8 @@ class MemoryImage extends ImageProvider<MemoryImage> {
   ///
   /// The arguments must not be null.
   const MemoryImage(this.bytes, { this.scale = 1.0 })
-      : assert(bytes != null),
-        assert(scale != null);
+    : assert(bytes != null),
+      assert(scale != null);
 
   /// The bytes to decode into an image.
   final Uint8List bytes;
@@ -611,7 +630,7 @@ class MemoryImage extends ImageProvider<MemoryImage> {
   ImageStreamCompleter load(MemoryImage key) {
     return MultiFrameImageStreamCompleter(
       codec: _loadAsync(key),
-      scale: key.scale
+      scale: key.scale,
     );
   }
 
@@ -696,8 +715,8 @@ class MemoryImage extends ImageProvider<MemoryImage> {
 /// it in the `assets` section:
 ///
 /// ```yaml
-///  assets:
-///    - packages/fancy_backgrounds/backgrounds/background1.png
+///   assets:
+///     - packages/fancy_backgrounds/backgrounds/background1.png
 /// ```
 ///
 /// The `lib/` is implied, so it should not be included in the asset path.
@@ -753,7 +772,7 @@ class ExactAssetImage extends AssetBundleImageProvider {
     return SynchronousFuture<AssetBundleImageKey>(AssetBundleImageKey(
       bundle: bundle ?? configuration.bundle ?? rootBundle,
       name: keyName,
-      scale: scale
+      scale: scale,
     ));
   }
 
@@ -772,4 +791,25 @@ class ExactAssetImage extends AssetBundleImageProvider {
 
   @override
   String toString() => '$runtimeType(name: "$keyName", scale: $scale, bundle: $bundle)';
+}
+
+// A completer used when resolving an image fails sync.
+class _ErrorImageCompleter extends ImageStreamCompleter {
+  _ErrorImageCompleter();
+
+  void setError({
+    String context,
+    dynamic exception,
+    StackTrace stack,
+    InformationCollector informationCollector,
+    bool silent = false,
+  }) {
+    reportError(
+      context: context,
+      exception: exception,
+      stack: stack,
+      informationCollector: informationCollector,
+      silent: silent,
+    );
+  }
 }

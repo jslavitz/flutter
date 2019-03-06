@@ -67,7 +67,8 @@ ImageConfiguration createLocalImageConfiguration(BuildContext context, { Size si
 /// The [BuildContext] and [Size] are used to select an image configuration
 /// (see [createLocalImageConfiguration]).
 ///
-/// The `onError` argument can be used to manually handle errors while precaching.
+/// The `onError` argument can be used to manually handle errors while
+/// pre-caching.
 ///
 /// See also:
 ///
@@ -83,9 +84,11 @@ Future<void> precacheImage(
   final ImageStream stream = provider.resolve(config);
   void listener(ImageInfo image, bool sync) {
     completer.complete();
+    stream.removeListener(listener);
   }
   void errorListener(dynamic exception, StackTrace stackTrace) {
     completer.complete();
+    stream.removeListener(listener);
     if (onError != null) {
       onError(exception, stackTrace);
     } else {
@@ -99,7 +102,6 @@ Future<void> precacheImage(
     }
   }
   stream.addListener(listener, onError: errorListener);
-  completer.future.then<void>((void value) { stream.removeListener(listener); });
   return completer.future;
 }
 
@@ -367,8 +369,8 @@ class Image extends StatefulWidget {
   /// specify it in the assets section:
   ///
   /// ```yaml
-  ///  assets:
-  ///    - packages/fancy_backgrounds/backgrounds/background1.png
+  ///   assets:
+  ///     - packages/fancy_backgrounds/backgrounds/background1.png
   /// ```
   ///
   /// The `lib/` is implied, so it should not be included in the asset path.
@@ -560,7 +562,7 @@ class Image extends StatefulWidget {
 
   /// A Semantic description of the image.
   ///
-  /// Used to provide a description of the image to TalkBack on Andoid, and
+  /// Used to provide a description of the image to TalkBack on Android, and
   /// VoiceOver on iOS.
   final String semanticLabel;
 
@@ -629,7 +631,7 @@ class _ImageState extends State<Image> {
     final ImageStream newStream =
       widget.image.resolve(createLocalImageConfiguration(
           context,
-          size: widget.width != null && widget.height != null ? Size(widget.width, widget.height) : null
+          size: widget.width != null && widget.height != null ? Size(widget.width, widget.height) : null,
       ));
     assert(newStream != null);
     _updateSourceStream(newStream);

@@ -218,7 +218,7 @@ abstract class ImplicitlyAnimatedWidget extends StatefulWidget {
   const ImplicitlyAnimatedWidget({
     Key key,
     this.curve = Curves.linear,
-    @required this.duration
+    @required this.duration,
   }) : assert(curve != null),
        assert(duration != null),
        super(key: key);
@@ -396,7 +396,8 @@ abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> exten
 ///
 /// The [AnimatedContainer] will automatically animate between the old and
 /// new values of properties when they change using the provided curve and
-/// duration. Properties that are null are not animated.
+/// duration. Properties that are null are not animated. Its child and
+/// descendants are not animated.
 ///
 /// This class is useful for generating simple implicit transitions between
 /// different parameters to [Container] with its internal [AnimationController].
@@ -418,6 +419,8 @@ abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> exten
 ///    position changes.
 ///  * [AnimatedAlign], which automatically transitions its child's
 ///    position over a given duration whenever the given [alignment] changes.
+///  * [AnimatedSwitcher], which switches out a child for a new one with a customizable transition.
+///  * [AnimatedCrossFade], which fades between two children and interpolates their sizes.
 class AnimatedContainer extends ImplicitlyAnimatedWidget {
   /// Creates a container that animates its parameters implicitly.
   ///
@@ -766,7 +769,7 @@ class AnimatedPositioned extends ImplicitlyAnimatedWidget {
     @required Duration duration,
   }) : assert(left == null || right == null || width == null),
        assert(top == null || bottom == null || height == null),
-      super(key: key, curve: curve, duration: duration);
+       super(key: key, curve: curve, duration: duration);
 
   /// Creates a widget that animates the rectangle it occupies implicitly.
   ///
@@ -776,7 +779,7 @@ class AnimatedPositioned extends ImplicitlyAnimatedWidget {
     this.child,
     Rect rect,
     Curve curve = Curves.linear,
-    @required Duration duration
+    @required Duration duration,
   }) : left = rect.left,
        top = rect.top,
        width = rect.width,
@@ -917,7 +920,7 @@ class AnimatedPositionedDirectional extends ImplicitlyAnimatedWidget {
     @required Duration duration,
   }) : assert(start == null || end == null || width == null),
        assert(top == null || bottom == null || height == null),
-      super(key: key, curve: curve, duration: duration);
+       super(key: key, curve: curve, duration: duration);
 
   /// The widget below this widget in the tree.
   ///
@@ -1113,7 +1116,7 @@ class _AnimatedOpacityState extends ImplicitlyAnimatedWidgetState<AnimatedOpacit
   Widget build(BuildContext context) {
     return FadeTransition(
       opacity: _opacityAnimation,
-      child: widget.child
+      child: widget.child,
     );
   }
 }

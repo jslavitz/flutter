@@ -111,8 +111,8 @@ const String _kAssetManifestFileName = 'AssetManifest.json';
 /// it in the `assets` section:
 ///
 /// ```yaml
-///  assets:
-///    - packages/fancy_backgrounds/backgrounds/background1.png
+///   assets:
+///     - packages/fancy_backgrounds/backgrounds/background1.png
 /// ```
 ///
 /// The `lib/` is implied, so it should not be included in the asset path.
@@ -176,13 +176,13 @@ class AssetImage extends AssetBundleImageProvider {
         final String chosenName = _chooseVariant(
           keyName,
           configuration,
-          manifest == null ? null : manifest[keyName]
+          manifest == null ? null : manifest[keyName],
         );
         final double chosenScale = _parseScale(chosenName);
         final AssetBundleImageKey key = AssetBundleImageKey(
           bundle: chosenBundle,
           name: chosenName,
-          scale: chosenScale
+          scale: chosenScale,
         );
         if (completer != null) {
           // We already returned from this function, which means we are in the
