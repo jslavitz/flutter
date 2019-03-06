@@ -874,7 +874,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       renderEditable.setFloatingCursor(FloatingCursorDragState.End, finalPosition, _lastTextPosition);
       if (_lastTextPosition.offset != renderEditable.selection.baseOffset)
         // The cause is technically the force cursor, but the cause is listed as tap as the desired functionality is the same.
-//        _handleSelectionChanged(TextSelection.collapsed(offset: _lastTextPosition.offset), renderEditable, SelectionChangedCause.forcePress);
+        _handleSelectionChanged(TextSelection.collapsed(offset: _lastTextPosition.offset), renderEditable, SelectionChangedCause.forcePress);
       _startCaretRect = null;
       _lastTextPosition = null;
       _pointOffsetOrigin = null;
@@ -1002,16 +1002,16 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   /// ask the focus system that it become focused. If successful in acquiring
   /// focus, the control will then attach to the keyboard and request that the
   /// keyboard become visible.
-//  void requestKeyboard() {
-//    if (_hasFocus) {
-//      _openInputConnection();
-//    } else {
-////      final List<FocusScopeNode> ancestorScopes = FocusScope.ancestorsOf(context);
-//      for (int i = ancestorScopes.length - 1; i >= 1; i -= 1)
-//        ancestorScopes[i].setFirstFocus(ancestorScopes[i - 1]);
-//      FocusScope.of(context).requestFocus(widget.focusNode);
-//    }
-//  }
+  void requestKeyboard() {
+    if (_hasFocus) {
+      _openInputConnection();
+    } else {
+      final List<FocusScopeNode> ancestorScopes = FocusScope.ancestorsOf(context);
+      for (int i = ancestorScopes.length - 1; i >= 1; i -= 1)
+        ancestorScopes[i].setFirstFocus(ancestorScopes[i - 1]);
+      FocusScope.of(context).requestFocus(widget.focusNode);
+    }
+  }
 
   void _hideSelectionOverlayIfNeeded() {
     _selectionOverlay?.hide();
@@ -1034,7 +1034,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
     // This will show the keyboard for all selection changes on the
     // EditableWidget, not just changes triggered by user gestures.
-//    requestKeyboard();
+    requestKeyboard();
 
     _hideSelectionOverlayIfNeeded();
 
@@ -1472,7 +1472,7 @@ class _Editable extends LeafRenderObjectWidget {
       showCursor: showCursor,
       hasFocus: hasFocus,
       maxLines: maxLines,
-//      strutStyle: strutStyle,
+      strutStyle: strutStyle,
       selectionColor: selectionColor,
       textScaleFactor: textScaleFactor,
       textAlign: textAlign,
@@ -1486,11 +1486,11 @@ class _Editable extends LeafRenderObjectWidget {
       obscureText: obscureText,
       cursorWidth: cursorWidth,
       cursorRadius: cursorRadius,
-//      cursorOffset: cursorOffset,
-//      paintCursorAboveText: paintCursorAboveText,
+      cursorOffset: cursorOffset,
+      paintCursorAboveText: paintCursorAboveText,
       enableInteractiveSelection: enableInteractiveSelection,
       textSelectionDelegate: textSelectionDelegate,
-//      devicePixelRatio: devicePixelRatio,
+      devicePixelRatio: devicePixelRatio,
     );
   }
 
@@ -1502,7 +1502,7 @@ class _Editable extends LeafRenderObjectWidget {
       ..showCursor = showCursor
       ..hasFocus = hasFocus
       ..maxLines = maxLines
-//      ..strutStyle = strutStyle
+      ..strutStyle = strutStyle
       ..selectionColor = selectionColor
       ..textScaleFactor = textScaleFactor
       ..textAlign = textAlign
@@ -1514,11 +1514,11 @@ class _Editable extends LeafRenderObjectWidget {
       ..onCaretChanged = onCaretChanged
       ..ignorePointer = rendererIgnoresPointer
       ..obscureText = obscureText
-      ..cursorWidth = cursorWidth;
-//      ..cursorRadius = cursorRadius
-//      ..cursorOffset = cursorOffset
-//      ..textSelectionDelegate = textSelectionDelegate
-//      ..devicePixelRatio = devicePixelRatio
-//      ..paintCursorAboveText = paintCursorAboveText;
+      ..cursorWidth = cursorWidth
+      ..cursorRadius = cursorRadius
+      ..cursorOffset = cursorOffset
+      ..textSelectionDelegate = textSelectionDelegate;
+      ..devicePixelRatio = devicePixelRatio
+      ..paintCursorAboveText = paintCursorAboveText;
   }
 }
