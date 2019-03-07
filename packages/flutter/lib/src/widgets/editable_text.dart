@@ -750,20 +750,20 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   @override
   void updateEditingValue(TextEditingValue value) {
 
-    _hasJustTypedCharacter = true;
-
-    print(_value.text[_value.text.length -1] == ' ');
+//    _hasJustTypedCharacter = true;
+//
+//    print(_value.text[_value.text.length -1] == ' ');
     // We want to replace whatever apple has typed with our own value.
-    if (_isAutocorrecting && _value.text[_value.text.length -1] == ' ') {
-      print('replacing');
-      _isAutocorrecting = false;
-      final TextEditingValue newValue = TextEditingValue(text: value.text.replaceRange(_lastStart, value.text.length - 1, _lastSuggestedWord),
-              selection: value.selection,
-              composing: value.composing
-      );
-      value = newValue;
-    }
-
+//    if (_isAutocorrecting && _value.text[_value.text.length -1] == ' ') {
+//      print('replacing');
+//      _isAutocorrecting = false;
+//      final TextEditingValue newValue = TextEditingValue(text: value.text.replaceRange(_lastStart, value.text.length - 1, _lastSuggestedWord),
+//              selection: value.selection,
+//              composing: value.composing
+//      );
+//      value = newValue;
+//    }
+print(value.composing);
     if (value.text != _value.text) {
       _hideSelectionOverlayIfNeeded();
       _showCaretOnScreen();
@@ -858,13 +858,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   void updateAutocorrectState(AutocorrectState state) {
-    _isAutocorrecting = true;
-    _lastSuggestedWord = state.suggestedWord;
-    if (_hasJustTypedCharacter) {
-      _hasJustTypedCharacter = false;
-      _lastStart = state.startIndex;
-      _lastEnd = state.endIndex;
-    }
+//    _isAutocorrecting = true;
+//    _lastSuggestedWord = state.suggestedWord;
+//    if (_hasJustTypedCharacter) {
+//      _hasJustTypedCharacter = false;
+//      _lastStart = state.startIndex;
+//      _lastEnd = state.endIndex;
+//    }
     print("f: start: " + state.startIndex.toString() + "f:end: " + state.endIndex.toString() + "f:word:" + state.suggestedWord);
   }
 
@@ -903,6 +903,16 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     // Invoke optional callback with the user's submitted content.
     if (widget.onSubmitted != null)
       widget.onSubmitted(_value.text);
+  }
+
+  ///
+  void dismissSuggestion() {
+    _textInputConnection.dismissAutocorrect();
+//    final TextEditingValue value = TextEditingValue(
+//      text: '',
+//    );
+//    _textInputConnection.setEditingState(value);
+
   }
 
   void _updateRemoteEditingValueIfNeeded() {

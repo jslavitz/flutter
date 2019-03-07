@@ -478,8 +478,9 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
   }
 
   void _handleSingleTapUp(TapUpDetails details) {
-    _renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
-    _requestKeyboard();
+//    _renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
+    _editableTextKey.currentState.dismissSuggestion();
+//    _requestKeyboard();
   }
 
   void _handleSingleLongTapStart(LongPressStartDetails details) {

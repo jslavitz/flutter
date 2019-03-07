@@ -662,6 +662,12 @@ class TextInputConnection {
     );
   }
 
+  ///
+  void dismissAutocorrect() {
+    assert(attached);
+    SystemChannels.textInput.invokeMethod<void>('TextInput.dismissAutocorrect');
+  }
+
   /// Stop interacting with the text input control.
   ///
   /// After calling this method, the text input control might disappear if no
@@ -749,6 +755,7 @@ class _TextInputClientHandler {
     // The incoming message was for a different client.
     if (client != _currentConnection._id)
       return;
+    print(method);
     switch (method) {
       case 'TextInputClient.updateEditingState':
         _currentConnection._client.updateEditingValue(TextEditingValue.fromJSON(args[1]));
