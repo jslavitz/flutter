@@ -851,21 +851,8 @@ print(value.composing);
     }
   }
 
-  bool _isAutocorrecting = false;
-  String _lastSuggestedWord;
-  int _lastStart;
-  int _lastEnd;
-
   @override
   void updateAutocorrectState(AutocorrectState state) {
-//    _isAutocorrecting = true;
-//    _lastSuggestedWord = state.suggestedWord;
-//    if (_hasJustTypedCharacter) {
-//      _hasJustTypedCharacter = false;
-//      _lastStart = state.startIndex;
-//      _lastEnd = state.endIndex;
-//    }
-    print("f: start: " + state.startIndex.toString() + "f:end: " + state.endIndex.toString() + "f:word:" + state.suggestedWord);
   }
 
   void _onFloatingCursorResetTick() {
@@ -905,14 +892,9 @@ print(value.composing);
       widget.onSubmitted(_value.text);
   }
 
-  ///
+  /// Dismisses the autocorrect suggestion bubble.
   void dismissSuggestion() {
     _textInputConnection.dismissAutocorrect();
-//    final TextEditingValue value = TextEditingValue(
-//      text: '',
-//    );
-//    _textInputConnection.setEditingState(value);
-
   }
 
   void _updateRemoteEditingValueIfNeeded() {
